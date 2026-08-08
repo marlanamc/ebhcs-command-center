@@ -22,7 +22,11 @@
   --brand-tint: #e0efed;
   --on-accent: #ffffff;
 
-  /* Earth — brass / rope (panel ticks, eyebrows, notices) */
+  /* Eyebrows — section labels & greeting (blue in light, brass in dark) */
+  --eyebrow: var(--brand);
+  --eyebrow-deep: var(--brand-deep);
+
+  /* Earth — brass / rope (cal add, decorative warmth) */
   --earth: #a67c3a;
   --earth-deep: #8a6428;
   --earth-tint: #f7eed8;
@@ -95,6 +99,8 @@
     --brand-deep: #4fc3c3;
     --brand-tint: #10302f;
     --on-accent: #06181a;
+    --eyebrow: var(--earth);
+    --eyebrow-deep: var(--earth-deep);
     --earth: #d9b158;
     --earth-deep: #d9b158;
     --earth-tint: #2e2612;
@@ -148,6 +154,8 @@
   --brand-deep: #4fc3c3;
   --brand-tint: #10302f;
   --on-accent: #06181a;
+  --eyebrow: var(--earth);
+  --eyebrow-deep: var(--earth-deep);
   --earth: #d9b158;
   --earth-deep: #d9b158;
   --earth-tint: #2e2612;
