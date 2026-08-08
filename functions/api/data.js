@@ -18,6 +18,7 @@
 const MAX_BYTES = 64 * 1024;
 const MAX_PINS = 40;
 const MAX_TODOS = 300;
+const MAX_EVENTS = 200;
 const KV_KEY = "focus:teaching";
 
 const json = (body, status = 200) =>
@@ -59,10 +60,16 @@ function clean(input) {
     done: Boolean(t?.done),
     created: str(t?.created, 40),
   }));
+  const events = (Array.isArray(o.events) ? o.events : []).slice(0, MAX_EVENTS).map((e) => ({
+    id: str(e?.id, 40),
+    date: /^\d{4}-\d{2}-\d{2}$/.test(str(e?.date, 10)) ? str(e?.date, 10) : "",
+    text: str(e?.text, 80),
+  }));
   return {
     v: 1,
     pins: pins.filter((p) => p.id && p.label && p.url),
     todos: todos.filter((t) => t.id && t.text),
+    events: events.filter((e) => e.id && e.date && e.text),
     updated: str(o.updated, 40) || new Date().toISOString(),
   };
 }
@@ -75,7 +82,7 @@ export async function onRequestGet({ env }) {
   if (!kv) return json({ error: "kv not bound" }, 503);
 
   const raw = await kv.get(KV_KEY);
-  if (!raw) return json({ v: 1, pins: [], todos: [], updated: null });
+  if (!raw) return json({ v: 1, pins: [], todos: [], events: [], updated: null });
   return new Response(raw, {
     headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });

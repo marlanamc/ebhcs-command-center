@@ -189,28 +189,30 @@
     .panel-title::before { content:""; flex:none; width:4px; height:11px; border-radius:2px; background:var(--earth); }
     .panel-title--anchor::before,
     .panel-title--waves::before,
-    .panel-title--compass::before { display:none; }
+    .panel-title--compass::before,
+    .panel-title--calendar::before { display:none; }
     .panel-title--anchor .panel-mark,
     .panel-title--waves .panel-mark,
-    .panel-title--compass .panel-mark { flex:none; width:13px; height:13px; color:var(--earth); }
+    .panel-title--compass .panel-mark,
+    .panel-title--calendar .panel-mark { flex:none; width:13px; height:13px; color:var(--earth); }
     .head-actions { margin-left:auto; display:flex; gap:6px; align-items:center; }
 
     /* ---- week strip ---------------------------------------------------
-       Sits above Drive in the left column, so it reads across from Pins.
-       Presentational: it shows the week and lets you look around it, but
-       nothing is wired to a calendar feed. */
+       Sits above Drive in the left column. Pick a day, add simple notes
+       as pills below the date — synced like pins and list items. */
     .cal-head {
-      display:flex; align-items:center; gap:12px;
-      padding:2px 0 14px; margin-bottom:6px;
-      border-bottom:1px solid var(--line);
-      box-shadow:inset 0 -2px 0 -1px var(--rule-brass);
+      display:flex; flex-direction:column; gap:8px;
+      padding:2px 0 10px; margin-bottom:0;
+    }
+    .cal-title-row {
+      display:flex; align-items:center; gap:10px; width:100%; min-height:34px;
     }
     .cal-date {
-      flex:1; min-width:0; margin:0;
+      flex:0 1 auto; min-width:0; margin:0;
       font-family:var(--display); font-weight:700; letter-spacing:-0.01em;
-      font-size:clamp(17px,2.1vw,22px); line-height:1.15; color:var(--ink);
+      font-size:clamp(17px,2.1vw,22px); line-height:1; color:var(--ink);
     }
-    .cal-nav { flex:none; display:flex; align-items:center; gap:6px; }
+    .cal-nav { flex:none; display:flex; align-items:center; gap:6px; margin-left:auto; }
     .cal-arrow {
       width:34px; height:34px; flex:none; display:grid; place-items:center;
       background:var(--card); border:1px solid var(--line); border-radius:9px;
@@ -229,8 +231,14 @@
       box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
     }
     .cal-week {
-      list-style:none; margin:0; padding:0;
+      list-style:none; margin:0; padding:6px 0 0;
+      border-top:1px solid var(--line);
+      box-shadow:inset 0 2px 0 -1px var(--rule-brass);
       display:grid; grid-template-columns:repeat(7,minmax(0,1fr));
+      align-items:start;
+    }
+    .cal-cell {
+      display:flex; flex-direction:column; align-items:center; min-width:0;
     }
     .cal-day {
       width:100%; display:flex; flex-direction:column; align-items:center; gap:9px;
@@ -242,6 +250,7 @@
       text-transform:uppercase; color:var(--faint);
     }
     .cal-num {
+      position:relative;
       width:38px; height:38px; display:grid; place-items:center; border-radius:50%;
       font-size:16px; font-variant-numeric:tabular-nums; line-height:1;
       /* background only — transitioning color here also animates the theme
@@ -259,6 +268,48 @@
       background:var(--brand); color:var(--on-accent); font-weight:700; box-shadow:none;
     }
     .cal-day[aria-pressed="true"] .cal-dow { color:var(--muted); }
+    .cal-day-notes {
+      display:flex; flex-direction:column; align-items:stretch; gap:4px;
+      width:100%; padding:0 3px 8px;
+    }
+    .cal-pill {
+      display:inline-flex; align-items:flex-start; gap:3px; width:100%;
+      font-size:10px; font-weight:600; line-height:1.25;
+      padding:3px 4px 3px 5px; border-radius:3px 7px 7px 3px;
+      background:var(--earth-tint);
+      border:1px solid color-mix(in srgb,var(--earth) 28%,var(--line));
+      border-left:3px solid var(--earth);
+      color:var(--ink);
+    }
+    .cal-pill-text { overflow-wrap:anywhere; }
+    .cal-pill-del {
+      flex:none; width:14px; height:14px; display:grid; place-items:center;
+      border:0; background:none; color:var(--faint); cursor:pointer;
+      font-size:10px; line-height:1; border-radius:50%; padding:0; margin-top:0;
+    }
+    .cal-pill-del:hover { color:var(--danger); background:color-mix(in srgb,var(--danger) 10%,transparent); }
+    .cal-add-btn {
+      flex:none; width:28px; height:28px; border-radius:999px;
+      border:1px dashed color-mix(in srgb,var(--earth) 42%,var(--line));
+      background:color-mix(in srgb,var(--earth-tint) 55%,var(--card));
+      color:var(--earth-deep); cursor:pointer;
+      font-size:17px; font-weight:400; line-height:1; padding:0 0 1px;
+      display:grid; place-items:center; transition:border-color .15s, color .15s;
+    }
+    .cal-add-btn:hover { border-color:var(--earth); color:var(--earth-deep); }
+    .cal-add-btn:focus-visible, .cal-pill-del:focus-visible {
+      outline:none; box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
+    .cal-add-form {
+      display:flex; flex-wrap:wrap; gap:8px; width:100%; padding:8px 0 0;
+    }
+    .cal-add-form[hidden] { display:none; }
+    .cal-add-form input {
+      flex:1; min-width:0; font:inherit; font-size:14px;
+      padding:8px 11px; border:1px solid var(--line); border-radius:8px;
+      background:var(--paper-2); color:var(--ink);
+    }
+    .cal-add-form input:focus { outline:none; border-color:var(--brand); background:var(--card); }
     @media (max-width:520px){
       .cal-num { width:34px; height:34px; font-size:15px; }
       .cal-day { gap:7px; }
@@ -615,6 +666,7 @@
     footer > span:first-child {
       font-family:var(--display); font-size:12px; letter-spacing:.01em; color:var(--faint);
     }
+    .footer-motto { font-family:var(--sans); font-style:italic; color:var(--faint); opacity:.85; }
     footer a { color:var(--ink); font-weight:650; text-decoration:underline; text-underline-offset:2px; }
     footer a:hover { color:var(--brand); }
 
@@ -698,7 +750,7 @@
     <div class="search-wrap" id="searchWrap" hidden>
       <div class="search-box">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="search" id="searchInput" placeholder="Search folders, sites, pins, list…" aria-label="Search everything" autocomplete="off" />
+        <input type="search" id="searchInput" placeholder="Search charts, sites, harbor pins, duty list, log…" aria-label="Search everything" autocomplete="off" />
         <span class="search-kbd" aria-hidden="true">/</span>
       </div>
       <p class="search-empty" id="searchEmpty" role="status" aria-live="polite" hidden></p>
@@ -707,18 +759,35 @@
     <main class="cols" id="board">
       <!-- LEFT: week strip + Drive + Websites -->
       <div class="col">
-        <section class="panel cal" data-section="This week" aria-labelledby="calDate">
+        <section class="panel cal" data-section="Ship's Log" aria-labelledby="calPanelTitle">
+          <div class="panel-head">
+            <h2 class="panel-title panel-title--calendar" id="calPanelTitle">
+              <svg class="panel-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
+              </svg>
+              Ship's Log
+            </h2>
+          </div>
           <div class="cal-head">
-            <h2 class="cal-date" id="calDate"></h2>
-            <div class="cal-nav">
-              <button class="cal-today" type="button" id="calToday" hidden>Today</button>
-              <button class="cal-arrow" type="button" id="calPrev" aria-label="Previous week">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-              </button>
-              <button class="cal-arrow" type="button" id="calNext" aria-label="Next week">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
+            <div class="cal-title-row">
+              <h3 class="cal-date" id="calDate"></h3>
+              <button class="cal-add-btn" type="button" id="calAddToggle" aria-label="Log entry for this day">+</button>
+              <div class="cal-nav">
+                <button class="cal-today" type="button" id="calToday" hidden>Today</button>
+                <button class="cal-arrow" type="button" id="calPrev" aria-label="Previous week">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <button class="cal-arrow" type="button" id="calNext" aria-label="Next week">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </div>
             </div>
+            <form class="cal-add-form" id="calAddForm" hidden>
+              <input type="text" id="calInput" maxlength="80" placeholder="First day of class…"
+                     autocomplete="off" aria-label="Log entry for this day" />
+              <button class="btn-sm btn-primary" type="submit">Log it</button>
+              <button class="btn-sm btn-ghost" type="button" id="calAddCancel">Cancel</button>
+            </form>
           </div>
           <ol class="cal-week" id="calWeek"></ol>
         </section>
@@ -743,7 +812,7 @@
 
       <!-- RIGHT: pins + list -->
       <div class="col sidebar">
-        <section class="panel" data-section="Pins">
+        <section class="panel" data-section="Harbor Pins">
           <div class="panel-head">
             <h2 class="panel-title panel-title--anchor">
               <svg class="panel-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -751,7 +820,7 @@
                 <path d="M12 22V8"/>
                 <path d="M5 12H2a10 10 0 0 0 20 0h-3"/>
               </svg>
-              Pins
+              Harbor Pins
             </h2>
             <div class="head-actions">
               <button class="head-link" type="button" id="pinManage" aria-pressed="false">Manage</button>
@@ -761,7 +830,7 @@
           <div id="pinEditor"></div>
         </section>
 
-        <section class="panel" data-section="List">
+        <section class="panel" data-section="Duty List">
           <div class="panel-head">
             <h2 class="panel-title panel-title--waves">
               <svg class="panel-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -769,10 +838,10 @@
                 <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
                 <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
               </svg>
-              List
+              Duty List
             </h2>
             <div class="head-actions">
-              <button class="head-link" type="button" id="todoAddToggle" aria-expanded="false" aria-controls="todoAdd">Add</button>
+              <button class="head-link" type="button" id="todoAddToggle" aria-expanded="false" aria-controls="todoAdd">Add duty</button>
             </div>
           </div>
           <form class="todo-add" id="todoAdd" hidden>
@@ -790,7 +859,7 @@
     </main>
 
     <footer>
-      <span>Teaching Command Center</span>
+      <span>Teaching Command Center <span class="footer-motto">· fair winds</span></span>
       <span id="syncSlot" role="status" aria-live="polite"></span>
     </footer>
   </div>
@@ -845,9 +914,9 @@
         ],
       },
       {
-        name:"All Material",
+        name:"Resources & Materials",
         url:"https://drive.google.com/",
-        accent:"var(--hue-7)",
+        accent:"#C75B4A",
         subfolders:[
           { name:"Level 3 Materials", url:"https://docs.google.com/spreadsheets/d/1fl75m2k2ydknoEPC-v7ByMHMbSrKRU08deuHgSkoJf8/edit?gid=0#gid=0" },
           { name:"Materials FY23", url:"https://drive.google.com/drive/folders/1CAyhRSauU9XPPjUusrSP1gTJy3232gVC" },
@@ -1031,7 +1100,7 @@
       });
 
       // flat rows: quick links, site tiles, pins, list items
-      ["#src-drive .src-quick", "#src-sites > .app-tile", "#pins > li", "#todos > li"].forEach(sel => {
+      ["#src-drive .src-quick", "#src-sites > .app-tile", "#pins > li", "#todos > li", ".cal-pill"].forEach(sel => {
         document.querySelectorAll(sel).forEach(el => {
           const hit = !el.classList.contains("list-empty") && hits(el);
           show(el, hit);
@@ -1078,53 +1147,7 @@
       document.getElementById("greeting").textContent = g;
     })();
 
-    /* ---- week strip ----------------------------------------------------
-       Local-midnight dates throughout: building these from UTC would slide
-       the highlighted day by one either side of the date line. */
-    (function () {
-      const weekEl = document.getElementById("calWeek");
-      const dateEl = document.getElementById("calDate");
-      const todayBtn = document.getElementById("calToday");
-
-      const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const addDays = (d, n) => { const x = midnight(d); x.setDate(x.getDate() + n); return x; };
-      const weekOf = (d) => addDays(d, -midnight(d).getDay());
-      const same = (a, b) => midnight(a).getTime() === midnight(b).getTime();
-      const longDate = (d) => d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
-
-      let selected = midnight(new Date());
-
-      function render(){
-        const today = midnight(new Date());
-        const start = weekOf(selected);
-        dateEl.textContent = longDate(selected);
-        weekEl.innerHTML = "";
-        for (let i = 0; i < 7; i++){
-          const d = addDays(start, i);
-          const isToday = same(d, today);
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "cal-day" + (isToday ? " is-today" : "");
-          btn.setAttribute("aria-pressed", String(same(d, selected)));
-          btn.setAttribute("aria-label", isToday ? `${longDate(d)} (today)` : longDate(d));
-          btn.innerHTML =
-            `<span class="cal-dow" aria-hidden="true">${d.toLocaleDateString(undefined, { weekday:"short" })}</span>` +
-            `<span class="cal-num" aria-hidden="true">${d.getDate()}</span>`;
-          btn.addEventListener("click", () => { selected = d; render(); });
-          const li = document.createElement("li");
-          li.appendChild(btn);
-          weekEl.appendChild(li);
-        }
-        todayBtn.hidden = same(start, weekOf(today));
-      }
-
-      /* Stepping a week moves the selection with it, so the heading always
-         names a day you can actually see in the strip. */
-      document.getElementById("calPrev").addEventListener("click", () => { selected = addDays(selected, -7); render(); });
-      document.getElementById("calNext").addEventListener("click", () => { selected = addDays(selected, 7); render(); });
-      todayBtn.addEventListener("click", () => { selected = midnight(new Date()); render(); });
-      render();
-    })();
+    /* ---- week strip — wired below after state is ready ---------------- */
 
     // ---- theme toggle ----
     (function () {
@@ -1201,11 +1224,19 @@
     }
     const uid = () => Math.random().toString(36).slice(2, 10);
 
-    let state = { v:1, pins:[], todos:[], updated:null };
+    let state = { v:1, pins:[], todos:[], events:[], updated:null };
 
     /* Anything coming from storage gets forced back into shape first. A
        half-written or older-shape payload used to throw on the first
        render and leave Pins + List permanently blank. */
+    function dateKey(d){
+      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const y = x.getFullYear();
+      const m = String(x.getMonth() + 1).padStart(2, "0");
+      const day = String(x.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
     function normalizeState(raw){
       const o = raw && typeof raw === "object" ? raw : {};
       return {
@@ -1215,6 +1246,9 @@
           .map(p => ({ ...p, url: safeUrl(p.url), color: /^#[0-9a-fA-F]{6}$/.test(p.color || "") ? p.color : DEFAULT_PIN_COLOR }))
           .filter(p => p.url),
         todos: (Array.isArray(o.todos) ? o.todos : []).filter(t => t && t.id && typeof t.text === "string"),
+        events: (Array.isArray(o.events) ? o.events : [])
+          .filter(e => e && e.id && typeof e.text === "string" && /^\d{4}-\d{2}-\d{2}$/.test(e.date || ""))
+          .map(e => ({ id: String(e.id).slice(0, 40), date: e.date, text: String(e.text).slice(0, 80) })),
         updated: typeof o.updated === "string" ? o.updated : null,
       };
     }
@@ -1243,7 +1277,7 @@
 
     const syncSlot = document.getElementById("syncSlot");
     function setSync(mode){
-      const label = { saving:"Saving…", saved:"Saved", local:"Saved on this device", error:"Couldn't sync" }[mode] || "";
+      const label = { saving:"Logging…", saved:"Logged", local:"Logged on this device", error:"Couldn't sync" }[mode] || "";
       syncSlot.innerHTML = `<span class="sync-note" data-state="${mode}"><span class="sync-dot" aria-hidden="true"></span>${label}</span>`;
     }
 
@@ -1282,6 +1316,7 @@
           saveLocal();
           renderPins();
           renderTodos();
+          renderCal();
           setSync("saved");
         }
       } catch(e){
@@ -1298,7 +1333,7 @@
 
     function renderPins(){
       if (!state.pins.length) {
-        pinsEl.innerHTML = pinManaging ? "" : `<li class="list-empty">No pins yet — add your most-used link.</li>`;
+        pinsEl.innerHTML = pinManaging ? "" : `<li class="list-empty">No pins yet — mark your harbor.</li>`;
       } else if (pinManaging) {
         pinsEl.innerHTML = state.pins.map(p => `
           <li class="pin-manage" data-id="${p.id}" data-search="${escapeHtml(p.label + " " + p.url)}">
@@ -1447,7 +1482,7 @@
     function renderTodos(){
       todosEl.classList.toggle("is-arranging", todoArranging);
       if (!state.todos.length) {
-        todosEl.innerHTML = `<li class="list-empty">Nothing on your list yet.</li>`;
+        todosEl.innerHTML = `<li class="list-empty">Clear deck — nothing on the list yet.</li>`;
         todoFoot.hidden = true;
         applySearch();
         return;
@@ -1557,9 +1592,125 @@
       renderTodos();
     });
 
+    /* ---- week strip + day notes ----------------------------------------
+       Local-midnight dates throughout: building these from UTC would slide
+       the highlighted day by one either side of the date line. */
+    const weekEl = document.getElementById("calWeek");
+    const dateEl = document.getElementById("calDate");
+    const todayBtn = document.getElementById("calToday");
+    const calAddForm = document.getElementById("calAddForm");
+    const calInput = document.getElementById("calInput");
+    const calAddToggle = document.getElementById("calAddToggle");
+    const calAddCancel = document.getElementById("calAddCancel");
+    const MAX_CAL_EVENTS = 200;
+
+    const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const addDays = (d, n) => { const x = midnight(d); x.setDate(x.getDate() + n); return x; };
+    const weekOf = (d) => addDays(d, -midnight(d).getDay());
+    const sameDay = (a, b) => midnight(a).getTime() === midnight(b).getTime();
+    const longDate = (d) => d.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
+
+    let calSelected = midnight(new Date());
+
+    function eventsForDate(d){
+      const key = dateKey(d);
+      return state.events.filter(e => e.date === key);
+    }
+
+    function setCalAddOpen(open){
+      calAddForm.hidden = !open;
+      calAddToggle.hidden = open;
+      if (open) calInput.focus();
+      else calInput.value = "";
+    }
+
+    function calPillHtml(e){
+      return `<span class="cal-pill" data-search="${escapeHtml(e.text)}">
+          <span class="cal-pill-text">${escapeHtml(e.text)}</span>
+          <button class="cal-pill-del" type="button" aria-label="Remove ${escapeHtml(e.text)}" data-cal-del="${e.id}">×</button>
+        </span>`;
+    }
+
+    function wireCalPillDeletes(root){
+      root.querySelectorAll("[data-cal-del]").forEach(btn => {
+        btn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          state.events = state.events.filter(e => e.id !== btn.dataset.calDel);
+          scheduleSave();
+          renderCal();
+        });
+      });
+    }
+
+    function renderCal(){
+      const today = midnight(new Date());
+      const start = weekOf(calSelected);
+      dateEl.textContent = longDate(calSelected);
+      weekEl.innerHTML = "";
+      for (let i = 0; i < 7; i++){
+        const d = addDays(start, i);
+        const isToday = sameDay(d, today);
+        const items = eventsForDate(d);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "cal-day" + (isToday ? " is-today" : "");
+        btn.setAttribute("aria-pressed", String(sameDay(d, calSelected)));
+        btn.setAttribute("aria-label", isToday ? `${longDate(d)} (today)` : longDate(d));
+        btn.innerHTML =
+          `<span class="cal-dow" aria-hidden="true">${d.toLocaleDateString(undefined, { weekday:"short" })}</span>` +
+          `<span class="cal-num" aria-hidden="true">${d.getDate()}</span>`;
+        btn.addEventListener("click", () => {
+          calSelected = d;
+          setCalAddOpen(false);
+          renderCal();
+        });
+        const li = document.createElement("li");
+        li.className = "cal-cell";
+        li.appendChild(btn);
+        if (items.length) {
+          const notes = document.createElement("div");
+          notes.className = "cal-day-notes";
+          notes.innerHTML = items.map(calPillHtml).join("");
+          li.appendChild(notes);
+        }
+        weekEl.appendChild(li);
+      }
+      wireCalPillDeletes(weekEl);
+      todayBtn.hidden = sameDay(start, weekOf(today));
+      applySearch();
+    }
+
+    document.getElementById("calPrev").addEventListener("click", () => {
+      calSelected = addDays(calSelected, -7);
+      setCalAddOpen(false);
+      renderCal();
+    });
+    document.getElementById("calNext").addEventListener("click", () => {
+      calSelected = addDays(calSelected, 7);
+      setCalAddOpen(false);
+      renderCal();
+    });
+    todayBtn.addEventListener("click", () => {
+      calSelected = midnight(new Date());
+      setCalAddOpen(false);
+      renderCal();
+    });
+    calAddToggle.addEventListener("click", () => setCalAddOpen(true));
+    calAddCancel.addEventListener("click", () => setCalAddOpen(false));
+    calAddForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = calInput.value.trim();
+      if (!text || state.events.length >= MAX_CAL_EVENTS) return;
+      state.events.push({ id: uid(), date: dateKey(calSelected), text });
+      scheduleSave();
+      setCalAddOpen(false);
+      renderCal();
+    });
+
     loadLocal();
     renderPins();
     renderTodos();
+    renderCal();
     loadRemote();
 
     if ("serviceWorker" in navigator) {
