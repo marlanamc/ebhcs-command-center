@@ -708,13 +708,18 @@
     /* =====================================================================
        EDIT HERE — this is the part you'll touch to add/change links.
 
-       DRIVE_FOLDERS: top-level folders shown as a flat row list. Each can
-       have "subfolders" (an array of the same shape) which expand in place
-       when the row is clicked — no nested links, just an accent dot + name.
-       "openUrl" on a folder puts an italic quick-open link above/below it.
+       DRIVE_FOLDERS: top-level folders shown as a flat row list. Each is
+       { name, url, accent } and can also carry "subfolders" (an array of
+       { name, url }) which expand in place when the row is clicked — no
+       nested links, just an accent dot + name. A folder with subfolders
+       becomes a toggle instead of a link, so its own "url" is unused.
        "soon: true" dims a row and makes it unclickable.
 
-       SITES: flat row list, same visual language, always a direct link.
+       The two italic quick-open links above and below the folder rows come
+       from DRIVE_ROOT_URL / DRIVE_EXTERNAL_URL, not from the folders.
+
+       SITES: icon tiles, always a direct link. { name, desc, url, accent }
+       plus either "mono" (a letter) or "icon" (a path to an image).
        ===================================================================== */
     const DRIVE_ROOT_NAME = "FY27";
     const DRIVE_ROOT_URL = "https://drive.google.com/";
@@ -1013,10 +1018,38 @@
 
     let state = { v:1, pins:[], todos:[], updated:null };
 
+    /* Anything coming from storage gets forced back into shape first. A
+       half-written or older-shape payload used to throw on the first
+       render and leave Pins + List permanently blank. */
+    function normalizeState(raw){
+      const o = raw && typeof raw === "object" ? raw : {};
+      return {
+        v: 1,
+        pins: (Array.isArray(o.pins) ? o.pins : [])
+          .filter(p => p && p.id && p.label)
+          .map(p => ({ ...p, url: safeUrl(p.url), color: /^#[0-9a-fA-F]{6}$/.test(p.color || "") ? p.color : DEFAULT_PIN_COLOR }))
+          .filter(p => p.url),
+        todos: (Array.isArray(o.todos) ? o.todos : []).filter(t => t && t.id && typeof t.text === "string"),
+        updated: typeof o.updated === "string" ? o.updated : null,
+      };
+    }
+
+    /* Same http(s)-only gate the API applies, so a "javascript:" URL can't
+       become a live href on the way in from storage or the pin form. */
+    function safeUrl(v){
+      let raw = typeof v === "string" ? v.trim().slice(0, 2048) : "";
+      if (!raw) return "";
+      if (!/^[a-z][a-z0-9+.-]*:/i.test(raw)) raw = "https://" + raw;
+      try {
+        const u = new URL(raw);
+        return (u.protocol === "http:" || u.protocol === "https:") ? u.href : "";
+      } catch(e){ return ""; }
+    }
+
     function loadLocal(){
       try {
         const raw = localStorage.getItem(LS_KEY);
-        if (raw) state = JSON.parse(raw);
+        if (raw) state = normalizeState(JSON.parse(raw));
       } catch(e){}
     }
     function saveLocal(){
@@ -1041,11 +1074,14 @@
             headers:{ "Content-Type":"application/json" },
             body: JSON.stringify(state),
           });
-          if (res.status === 503) { setSync("local"); return; }
+          /* 503 = no KV binding, 404 = no API at all (plain static host or
+             `python -m http.server`). Both mean "there is no sync here",
+             which is different from a sync that tried and failed. */
+          if (res.status === 503 || res.status === 404) { setSync("local"); return; }
           if (!res.ok) throw new Error("save failed");
           setSync("saved");
         } catch(e){
-          setSync("local");
+          setSync("error");
         }
       }, 500);
     }
@@ -1053,18 +1089,18 @@
     async function loadRemote(){
       try {
         const res = await fetch(API_URL);
-        if (res.status === 503) { setSync("local"); return; }
+        if (res.status === 503 || res.status === 404) { setSync("local"); return; }
         if (!res.ok) throw new Error("load failed");
         const data = await res.json();
-        if (data && Array.isArray(data.pins)) {
-          state = data;
+        if (data && Array.isArray(data.pins) && Array.isArray(data.todos)) {
+          state = normalizeState(data);
           saveLocal();
           renderPins();
           renderTodos();
           setSync("saved");
         }
       } catch(e){
-        setSync("local");
+        setSync("error");
       }
     }
 
@@ -1081,7 +1117,7 @@
       } else if (pinManaging) {
         pinsEl.innerHTML = state.pins.map(p => `
           <li class="pin-manage" data-id="${p.id}" data-search="${escapeHtml(p.label + " " + p.url)}">
-            <span class="link-icon" style="--link-accent:${p.color}" aria-hidden="true">${pinIconHtml(p.icon)}</span>
+            <span class="link-icon" style="--link-accent:${escapeHtml(p.color)}" aria-hidden="true">${pinIconHtml(p.icon)}</span>
             <span class="pin-label">${escapeHtml(p.label)}</span>
             <div class="pin-actions">
               <button class="mini-btn" type="button" data-edit="${p.id}">Edit</button>
@@ -1091,7 +1127,7 @@
       } else {
         pinsEl.innerHTML = state.pins.map(p => `
           <li data-search="${escapeHtml(p.label + " " + p.url)}">
-            <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="--link-accent:${p.color}">
+            <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="--link-accent:${escapeHtml(p.color)}">
               <span class="link-icon" aria-hidden="true">${pinIconHtml(p.icon)}</span>
               <span class="lname">${escapeHtml(p.label)}</span>
               <span class="larr" aria-hidden="true">↗</span>
@@ -1123,7 +1159,11 @@
           <label for="pinLabel">Label</label>
           <input type="text" id="pinLabel" maxlength="60" required value="${escapeHtml(pin.label)}" />
           <label for="pinUrl">URL</label>
-          <input type="url" id="pinUrl" maxlength="2048" required value="${escapeHtml(pin.url)}" />
+          <!-- text, not url: type="url" rejects a bare "example.com" outright
+               (so the https:// auto-prefix below never got a chance) while
+               happily accepting "javascript:". safeUrl() does both jobs. -->
+          <input type="text" inputmode="url" id="pinUrl" maxlength="2048" required
+                 placeholder="example.com" value="${escapeHtml(pin.url)}" />
           <label>Icon</label>
           <div class="icon-picks" id="pinIcons">
             ${PIN_ICON_IDS.map(iconId => `<button type="button" class="icon-pick" data-icon="${iconId}" aria-pressed="${iconId === normalizePinIcon(pin.icon)}" aria-label="${PIN_ICON_LABELS[iconId] || iconId}">${pinIconSvg(iconId)}</button>`).join("")}
@@ -1163,9 +1203,8 @@
       document.getElementById("pinForm").addEventListener("submit", (e) => {
         e.preventDefault();
         const label = document.getElementById("pinLabel").value.trim();
-        let url = document.getElementById("pinUrl").value.trim();
+        const url = safeUrl(document.getElementById("pinUrl").value);
         if (!label || !url) return;
-        if (!/^[a-z][a-z0-9+.-]*:/i.test(url)) url = "https://" + url;
         if (id) {
           const p = state.pins.find(x => x.id === id);
           Object.assign(p, { label, url, color: chosenColor, icon: chosenIcon });

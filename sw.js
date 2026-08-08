@@ -1,4 +1,4 @@
-const CACHE = "tcc-shell-v2";
+const CACHE = "tcc-shell-v3";
 const SHELL = ["./", "./index.html", "./tokens.css", "./manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
@@ -19,6 +19,12 @@ self.addEventListener("activate", (event) => {
    else (fonts, icons, css) is cache-first for instant offline paint. */
 self.addEventListener("fetch", (event) => {
   const { request } = event;
+
+  /* Stay out of the way of the API and of any write. Returning without
+     respondWith hands the request back to the browser untouched, so a
+     stale pins/list response can never come out of the cache. */
+  if (request.method !== "GET" || new URL(request.url).pathname.startsWith("/api/")) return;
+
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request).catch(() => caches.match("./index.html"))
