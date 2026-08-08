@@ -124,6 +124,20 @@
 
     /* ---- search ------------------------------------------------------ */
     .search-wrap { margin-bottom:28px; }
+    .search-empty { margin:12px 2px 0; font-size:14px; color:var(--faint); }
+    .search-empty[hidden] { display:none; }
+    /* search filtering: rows/tiles/sections that don't match drop out.
+       !important because most of these are flex or grid items. */
+    .search-hidden { display:none !important; }
+    /* a collapsed Drive section (or subfolder list) still shows its matches
+       while a search is running — the collapse state itself is left alone,
+       so clearing the search restores exactly what you had open. */
+    body.is-searching #driveBody[hidden]:not(.search-hidden),
+    body.is-searching .src-sub[hidden]:not(.search-hidden) { display:block !important; }
+    /* results stack in one column so they read top-to-bottom instead of
+       stranding a half-empty sidebar next to a blank left column */
+    body.is-searching .cols { display:flex; flex-direction:column; gap:30px; align-items:stretch; }
+    body.is-searching .col { gap:30px; }
     .search-box {
       display:flex; align-items:center; gap:10px;
       background:var(--card); border:1px solid color-mix(in srgb,var(--brand) 20%,var(--line));
@@ -609,9 +623,10 @@
     <div class="search-wrap">
       <div class="search-box">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="search" id="searchInput" placeholder="Search the chart…" aria-label="Search links" autocomplete="off" />
+        <input type="search" id="searchInput" placeholder="Search folders, sites, pins, list…" aria-label="Search everything" autocomplete="off" />
         <span class="search-kbd" aria-hidden="true">/</span>
       </div>
+      <p class="search-empty" id="searchEmpty" role="status" aria-live="polite" hidden></p>
     </div>
 
     <main class="cols" id="board">
@@ -637,7 +652,7 @@
 
       <!-- RIGHT: pins + list -->
       <div class="col sidebar">
-        <section class="panel">
+        <section class="panel" data-section="Pins">
           <div class="panel-head">
             <h2 class="panel-title panel-title--anchor">
               <svg class="panel-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -655,7 +670,7 @@
           <div id="pinEditor"></div>
         </section>
 
-        <section class="panel">
+        <section class="panel" data-section="List">
           <div class="panel-head">
             <h2 class="panel-title panel-title--waves">
               <svg class="panel-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -748,14 +763,16 @@
         const subList = hasSub ? `
           <ul class="src-sub" id="${subId}" hidden>
             ${f.subfolders.map(sf => `
-              <li class="src-row">
+              <li class="src-row" data-search="${escapeHtml(sf.name)}">
                 <a class="src-row-main" href="${escapeHtml(sf.url)}" target="_blank" rel="noopener noreferrer">
                   <span class="src-dot" style="--accent:${f.accent || "var(--brand)"}" aria-hidden="true"></span>
                   <span class="src-row-name">${escapeHtml(sf.name)}</span>
                 </a>
               </li>`).join("")}
           </ul>` : "";
-        return `<li class="src-row${soonCls}">${mainEl}${subList}</li>`;
+        /* data-search is the row's OWN name — without it a parent would match
+           on its subfolders' text and drag the whole group into results. */
+        return `<li class="src-row${soonCls}" data-search="${escapeHtml(f.name)}">${mainEl}${subList}</li>`;
       }).join("");
 
       el.innerHTML = `
@@ -802,7 +819,7 @@
       el.innerHTML = SITES.map(s => {
         const inner = s.icon ? `<img src="${s.icon}" alt="" />` : escapeHtml(s.mono || "?");
         return `
-        <a class="app-tile" href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" style="--accent:${s.accent || "var(--brand)"}">
+        <a class="app-tile" href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" style="--accent:${s.accent || "var(--brand)"}" data-search="${escapeHtml([s.name, s.desc, s.url].filter(Boolean).join(" "))}">
           <span class="app-icon" aria-hidden="true">${inner}</span>
           <span class="app-body">
             <span class="app-name">${escapeHtml(s.name)}</span>
@@ -816,21 +833,85 @@
     renderDrive();
     renderSites();
 
-    // ---- search: filters rows across Drive + Websites ----
+    /* ---- search: filters everything on the page ----------------------
+       Drive folders + subfolders, the Drive quick links, website tiles,
+       pins, and list items. Items carry a data-search string when the
+       useful text isn't all on screen (a site's URL, a pin's URL);
+       everything else falls back to its visible text. Sections with no
+       matches left drop out entirely. */
     const searchInput = document.getElementById("searchInput");
+    const searchEmptyEl = document.getElementById("searchEmpty");
+
     document.addEventListener("keydown", (e) => {
       if (e.key === "/" && document.activeElement !== searchInput && !e.metaKey && !e.ctrlKey) {
         e.preventDefault();
         searchInput.focus();
       }
+      if (e.key === "Escape" && document.activeElement === searchInput) {
+        searchInput.value = "";
+        applySearch();
+      }
     });
-    searchInput.addEventListener("input", () => {
-      const q = searchInput.value.trim().toLowerCase();
-      document.querySelectorAll("#src-drive > .src-rows > .src-row, #src-sites > .app-tile").forEach(el => {
-        const text = el.textContent.toLowerCase();
-        el.style.display = !q || text.includes(q) ? "" : "none";
+
+    function applySearch(){
+      const raw = searchInput.value.trim();
+      const q = raw.toLowerCase();
+      const on = !!q;
+      document.body.classList.toggle("is-searching", on);
+
+      const hits = (el) => (el.dataset.search || el.textContent || "").toLowerCase().includes(q);
+      const show = (el, visible) => el.classList.toggle("search-hidden", on && !visible);
+
+      const counts = new Map();
+      const bump = (el) => {
+        const sec = el.closest("[data-section]");
+        if (sec) counts.set(sec, (counts.get(sec) || 0) + 1);
+      };
+
+      // Drive folders: a folder stays if its own name matches, or any of its
+      // subfolders do (in which case only the matching subfolders show).
+      document.querySelectorAll("#src-drive .src-rows > .src-row").forEach(row => {
+        const selfHit = hits(row);
+        const sub = row.querySelector(".src-sub");
+        let subHits = 0;
+        if (sub) {
+          sub.querySelectorAll(".src-row").forEach(sr => {
+            const hit = selfHit || hits(sr);
+            show(sr, hit);
+            if (hit) subHits++;
+          });
+          show(sub, selfHit || subHits > 0);
+        }
+        const hit = selfHit || subHits > 0;
+        show(row, hit);
+        if (hit) bump(row);
       });
-    });
+
+      // flat rows: quick links, site tiles, pins, list items
+      ["#src-drive .src-quick", "#src-sites > .app-tile", "#pins > li", "#todos > li"].forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+          const hit = !el.classList.contains("list-empty") && hits(el);
+          show(el, hit);
+          if (hit) bump(el);
+        });
+      });
+
+      let total = 0;
+      document.querySelectorAll("[data-section]").forEach(sec => {
+        const n = counts.get(sec) || 0;
+        total += n;
+        sec.classList.toggle("search-hidden", on && n === 0);
+      });
+      document.querySelectorAll(".col").forEach(col => {
+        const alive = [...col.querySelectorAll("[data-section]")].some(s => !s.classList.contains("search-hidden"));
+        col.classList.toggle("search-hidden", on && !alive);
+      });
+
+      searchEmptyEl.hidden = !on || total > 0;
+      if (on && !total) searchEmptyEl.textContent = `Nothing matches “${raw}”.`;
+    }
+
+    searchInput.addEventListener("input", applySearch);
 
     // ---- greeting + date ----
     (function () {
@@ -999,7 +1080,7 @@
         pinsEl.innerHTML = pinManaging ? "" : `<li class="list-empty">No pins yet — add your most-used link.</li>`;
       } else if (pinManaging) {
         pinsEl.innerHTML = state.pins.map(p => `
-          <li class="pin-manage" data-id="${p.id}">
+          <li class="pin-manage" data-id="${p.id}" data-search="${escapeHtml(p.label + " " + p.url)}">
             <span class="link-icon" style="--link-accent:${p.color}" aria-hidden="true">${pinIconHtml(p.icon)}</span>
             <span class="pin-label">${escapeHtml(p.label)}</span>
             <div class="pin-actions">
@@ -1009,7 +1090,7 @@
           </li>`).join("");
       } else {
         pinsEl.innerHTML = state.pins.map(p => `
-          <li>
+          <li data-search="${escapeHtml(p.label + " " + p.url)}">
             <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="--link-accent:${p.color}">
               <span class="link-icon" aria-hidden="true">${pinIconHtml(p.icon)}</span>
               <span class="lname">${escapeHtml(p.label)}</span>
@@ -1018,6 +1099,7 @@
           </li>`).join("");
       }
       renderPinEditorList();
+      applySearch();
     }
 
     function renderPinEditorList(){
@@ -1143,6 +1225,7 @@
       if (!state.todos.length) {
         todosEl.innerHTML = `<li class="list-empty">Nothing on your list yet.</li>`;
         todoFoot.hidden = true;
+        applySearch();
         return;
       }
       const ordered = orderedTodos();
@@ -1157,7 +1240,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
             </button>` : "";
         return `
-        <li class="todo${t.done ? " done" : ""}" data-id="${t.id}">
+        <li class="todo${t.done ? " done" : ""}" data-id="${t.id}" data-search="${escapeHtml(t.text)}">
           <button class="todo-check" type="button" aria-label="${t.done ? "Mark not done" : "Mark done"}" data-check="${t.id}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </button>
@@ -1214,6 +1297,7 @@
           });
         });
       });
+      applySearch();
     }
 
     function setTodoAddOpen(open){
