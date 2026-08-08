@@ -1,4 +1,4 @@
-const CACHE = "tcc-shell-v3";
+const CACHE = "tcc-shell-v4";
 const SHELL = ["./", "./index.html", "./tokens.css", "./manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {

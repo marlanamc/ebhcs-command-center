@@ -69,17 +69,34 @@ To remove either kind, delete its entry. That's it.
 
 ---
 
+## The week strip
+
+Above Google Drive, across from Pins: the current week, Sunday to Saturday.
+Today is ringed, the day you're looking at is filled. The arrows step a week
+at a time, and a **Today** link appears once you've wandered off the current
+week.
+
+It's presentational — a week at a glance and a way to look ahead. Nothing is
+wired to Google Calendar; that would need OAuth and a real backend, which
+this project deliberately doesn't have.
+
+---
+
 ## Search
 
-The search box (or press `/`) filters **everything on the page at once** —
-Drive folders and their subfolders, the Drive quick links, website tiles,
-pins, and list items. Sections with no matches drop out, and the results
-stack into a single column.
+Search lives behind the magnifier in the header, so it costs no width until
+you want it. Click it or press `/` to open, `Esc` to close. Closing clears
+the query — a filter still running with no visible box to clear would just
+look like a broken page.
+
+It filters **everything on the page at once** — Drive folders and their
+subfolders, the Drive quick links, website tiles, pins, and list items.
+Sections with no matches drop out, and the results stack into a single
+column.
 
 It also matches on text you can't see: a site's or pin's URL, so searching
 a domain finds it. A collapsed Drive section still shows its matches, and
-clearing the search leaves it exactly as collapsed as you had it. `Esc`
-clears the box.
+clearing the search leaves it exactly as collapsed as you had it.
 
 ---
 
@@ -130,7 +147,7 @@ git push -u origin main
 At the top of `sw.js`:
 
 ```js
-const CACHE = "tcc-shell-v3";   // bump the number on every deploy
+const CACHE = "tcc-shell-v4";   // bump the number on every deploy
 ```
 
 Increment that number every time you deploy, so the old cached copy is
