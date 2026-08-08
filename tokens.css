@@ -1,71 +1,69 @@
 /* ============================================================================
-   Teaching Command Center — shared design tokens
-   Nautical palette: cool fog-grey paper by day, deep navy hull by night, with
-   a harbor-teal interactive signal and a brass/rope structural accent. Built
-   to sit next to the Training Unit Command Center's warm paper + steel-blue
-   look and read as unmistakably different at a glance.
+   EBHCS Command Center — shared design tokens
+   Nautical palette: warm Cape Cod sand + clapboard by day, deep navy hull by
+   night, with harbor blue interactive signal and brass/rope structural accent.
    ========================================================================= */
 :root {
-  /* Neutrals — harbor mist: teal fog over chart paper, not flat office grey */
-  --paper: #e2eaee;
-  --paper-deep: #d1dce2;
-  --paper-2: #d9e3e8;
-  --hover-tint: #f2f8f8;
-  --card: #f6fafa;
-  --line: #bdd0d7;
-  --line-soft: #cedde3;
-  --ink: #0f1a22;
-  --muted: #3f5058;
-  --faint: #5a6b73;
+  /* Neutrals — sun-bleached sand, driftwood lines, navy ink */
+  --paper: #f3ece1;
+  --paper-deep: #e8dfd1;
+  --paper-2: #ede6da;
+  --hover-tint: #faf6ef;
+  --card: #fffcf7;
+  --line: #d5cabb;
+  --line-soft: #e2dacf;
+  --ink: #1a2838;
+  --muted: #4f5d6b;
+  --faint: #7a7268;
 
-  /* Brand — harbor teal (interactive signal ONLY: focus, links, toggles, primary buttons) */
-  --brand: #0c7272;
-  --brand-deep: #0a5c5c;
-  --brand-tint: #d9eeed;
+  /* Brand — Cape harbor blue (focus, links, toggles, primary buttons) */
+  --brand: #1f5f6f;
+  --brand-deep: #184952;
+  --brand-tint: #e0efed;
   --on-accent: #ffffff;
 
-  /* Earth — brass / rope (structural warmth: panel ticks, eyebrows, notices) */
-  --earth: #9a7428;
-  --earth-deep: #7d5f1f;
-  --earth-tint: #f5eed8;
-  --warm: #b06f2e;
-  --warm-deep: #925a22;
-  --warm-tint: #f8efe3;
+  /* Earth — brass / rope (panel ticks, eyebrows, notices) */
+  --earth: #a67c3a;
+  --earth-deep: #8a6428;
+  --earth-tint: #f7eed8;
+  --warm: #b87333;
+  --warm-deep: #965a22;
+  --warm-tint: #faefe3;
 
-  /* Signal hues — per-tile accents, kept in the navy/teal/brass family */
-  --hue-1: #0c7272;
-  --hue-1-tint: #d9eeed;
-  --hue-2: #1a5276;
-  --hue-2-tint: #dce8f0;
-  --hue-3: #9a7428;
-  --hue-3-tint: #f5eed8;
-  --hue-4: #3c6e71;
-  --hue-4-tint: #dce9ea;
-  --hue-5: #4c6a92;
-  --hue-5-tint: #e3eaf2;
-  --hue-6: #2f7d7d;
-  --hue-6-tint: #d9eded;
-  --hue-7: #495764;
-  --hue-7-tint: #e4eaee;
-  --hue-8: #925a22;
-  --hue-8-tint: #f3e8da;
+  /* Signal hues — navy, sea, brass, weathered accent family */
+  --hue-1: #1f5f6f;
+  --hue-1-tint: #e0efed;
+  --hue-2: #2a5478;
+  --hue-2-tint: #e3eaf0;
+  --hue-3: #a67c3a;
+  --hue-3-tint: #f7eed8;
+  --hue-4: #3d7175;
+  --hue-4-tint: #e2ecec;
+  --hue-5: #4e678a;
+  --hue-5-tint: #e6ebf1;
+  --hue-6: #3a7777;
+  --hue-6-tint: #e2eded;
+  --hue-7: #5c5348;
+  --hue-7-tint: #ebe6df;
+  --hue-8: #965a22;
+  --hue-8-tint: #f5e9da;
 
-  /* Page canvas — soft atmospheric lift; dark mode flattens this back to hull */
-  --canvas-bg: linear-gradient(168deg, #eaf0f3 0%, #dfe8ec 44%, #e6ecef 100%);
-  --hero-bg: linear-gradient(118deg, #f8fbfb 10%, #e5f0ef 50%, color-mix(in srgb, var(--brand-deep) 11%, #e8f2f1) 100%);
-  --chart-grid: color-mix(in srgb, var(--brand) 9%, transparent);
-  --rule-brass: color-mix(in srgb, var(--earth) 42%, transparent);
-  --panel-sidebar-bg: color-mix(in srgb, var(--brand) 4%, var(--card));
-  --panel-sidebar-border: color-mix(in srgb, var(--brand) 12%, var(--line));
+  /* Page canvas — soft morning over the dunes, faint sea mist at the top */
+  --canvas-bg: linear-gradient(180deg, #eef3ef 0%, #f5efe4 38%, #efe7da 100%);
+  --hero-bg: linear-gradient(118deg, #fffdf9 8%, #f9f3e9 52%, color-mix(in srgb, var(--earth) 7%, #f1e8dc) 100%);
+  --chart-grid: color-mix(in srgb, var(--earth) 10%, transparent);
+  --rule-brass: color-mix(in srgb, var(--earth) 45%, transparent);
+  --panel-sidebar-bg: color-mix(in srgb, var(--earth) 5%, var(--card));
+  --panel-sidebar-border: color-mix(in srgb, var(--earth) 14%, var(--line));
   --panel-sidebar-shadow: var(--shadow);
 
-  /* Status — lifecycle states (kept for parity with reused component CSS) */
+  /* Status — lifecycle states */
   --ok: #1a7f5a;
-  --wait: #1a5276;
-  --idle: #7c8a92;
+  --wait: #2a5478;
+  --idle: #8a8278;
   --overdue: #b3402c;
   --danger: #b3402c;
-  --working: #b06f2e;
+  --working: #b87333;
 
   /* Typography */
   --sans: "Geist", "Segoe UI Variable", "Segoe UI", "Inter", system-ui, sans-serif;
@@ -76,8 +74,8 @@
   --layout-gutter: 24px;
   --radius: 12px;
   --radius-lg: 16px;
-  --shadow: 0 1px 2px rgba(10, 50, 55, 0.06), 0 8px 26px -6px rgba(11, 60, 65, 0.14);
-  --shadow-lg: 0 3px 10px rgba(10, 50, 55, 0.08), 0 20px 44px -12px rgba(11, 60, 65, 0.18);
+  --shadow: 0 1px 2px rgba(45, 35, 25, 0.06), 0 8px 26px -6px rgba(45, 35, 25, 0.11);
+  --shadow-lg: 0 3px 10px rgba(45, 35, 25, 0.08), 0 20px 44px -12px rgba(45, 35, 25, 0.14);
 }
 
 @media (prefers-color-scheme: dark) {

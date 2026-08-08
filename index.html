@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Teaching Command Center</title>
+  <title>EBHCS Command Center</title>
   <meta name="description" content="One place for Drive folders, your teaching sites, pins, and your list." />
-  <meta name="theme-color" content="#0b5252" />
+  <meta name="theme-color" content="#184952" />
   <link rel="icon" href="icons/app/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icons/app/icon-512.png" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Teaching" />
+  <meta name="apple-mobile-web-app-title" content="EBHCS" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
@@ -70,15 +70,6 @@
       background-size:28px 28px;
       mask-image:linear-gradient(to bottom, #000 0%, transparent 78%);
       opacity:.85;
-    }
-    /* Quiet wave line — confined to the header band */
-    header.hero::after {
-      content:"";
-      position:absolute; left:0; right:0; bottom:-1px; height:34px;
-      pointer-events:none;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24' preserveAspectRatio='none'%3E%3Cpath d='M0 16 Q 25 4 50 16 T 100 16 T 150 16 T 200 16 T 250 16 T 300 16' fill='none' stroke='%230a5c5c' stroke-opacity='0.16' stroke-width='2'/%3E%3C/svg%3E");
-      background-repeat:repeat-x; background-size:300px 24px;
-      opacity:.9;
     }
     .hero-inner {
       display:flex; align-items:center; flex-wrap:wrap; gap:4px 12px;
@@ -700,15 +691,6 @@
     }
 
     @media (prefers-reduced-motion: reduce){ * { transition:none !important; } }
-
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) header.hero::after {
-        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24' preserveAspectRatio='none'%3E%3Cpath d='M0 16 Q 25 4 50 16 T 100 16 T 150 16 T 200 16 T 250 16 T 300 16' fill='none' stroke='%234fc3c3' stroke-opacity='0.14' stroke-width='2'/%3E%3C/svg%3E");
-      }
-    }
-    :root[data-theme="dark"] header.hero::after {
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24' preserveAspectRatio='none'%3E%3Cpath d='M0 16 Q 25 4 50 16 T 100 16 T 150 16 T 200 16 T 250 16 T 300 16' fill='none' stroke='%234fc3c3' stroke-opacity='0.14' stroke-width='2'/%3E%3C/svg%3E");
-    }
   </style>
   <script>
     try { var t = localStorage.getItem("tcc-theme"); if (t) document.documentElement.dataset.theme = t; } catch(e){}
@@ -733,7 +715,7 @@
             <path d="M8 22h8"/>
           </svg>
         </span>
-        <h1>Teaching Command Center</h1>
+        <h1>EBHCS Command Center</h1>
         <div class="head-meta">
           <span class="greeting" id="greeting"></span>
         </div>
@@ -850,7 +832,7 @@
     </main>
 
     <footer>
-      <span>Teaching Command Center <span class="footer-motto">· fair winds</span></span>
+      <span>EBHCS Command Center <span class="footer-motto">· fair winds</span></span>
       <span id="syncSlot" role="status" aria-live="polite"></span>
     </footer>
   </div>
@@ -1171,9 +1153,9 @@
     const API_URL = "/api/data";
 
     const PIN_COLORS = [
-      "#0c7272", "#1a5276", "#9a7428", "#3c6e71", "#4c6a92", "#925a22",
-      "#2f7d7d", "#495764", "#1a7f5a", "#0077b6", "#5c4d7a", "#b3402c",
-      "#6b5b4e", "#2d6a4f", "#8b6914", "#4a6670",
+      "#1f5f6f", "#2a5478", "#a67c3a", "#3d7175", "#4e678a", "#965a22",
+      "#3a7777", "#5c5348", "#1a7f5a", "#0077b6", "#5c4d7a", "#b3402c",
+      "#6b5b4e", "#2d6a4f", "#8b6914", "#184952",
     ];
     const PIN_ICON_PATHS = {
       anchor: '<circle cx="12" cy="5" r="3"/><path d="M12 22V8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/>',
