@@ -20,13 +20,17 @@
   <style>
     * { box-sizing:border-box; }
     html { -webkit-text-size-adjust:100%; overflow-x:clip; overscroll-behavior-x:none; }
+    :root {
+      --page-top-gutter: max(20px, env(safe-area-inset-top, 0px));
+      --header-top-pad: max(28px, calc(env(safe-area-inset-top, 0px) + 14px));
+    }
     body {
       margin:0; width:100%; max-width:100%; overflow-x:clip; overscroll-behavior-x:none;
       touch-action:pan-y pinch-zoom;
       font-family:var(--sans); color:var(--ink); line-height:1.5;
       background:var(--canvas-bg);
       -webkit-font-smoothing:antialiased;
-      padding:max(20px,env(safe-area-inset-top)) var(--layout-gutter) calc(40px + env(safe-area-inset-bottom));
+      padding:var(--page-top-gutter) var(--layout-gutter) calc(40px + env(safe-area-inset-bottom));
       min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; align-items:stretch;
     }
     .wrap {
@@ -46,8 +50,9 @@
     /* ---- header ------------------------------------------------------ */
     header.hero {
       margin-inline:calc(50% - 50vw);
-      margin-top:calc(-1 * max(20px,env(safe-area-inset-top)));
+      margin-top:calc(-1 * var(--page-top-gutter));
       margin-bottom:26px;
+      padding-top:var(--header-top-pad);
       padding-inline:var(--layout-gutter);
       background:var(--hero-bg);
       border-bottom:1px solid var(--line);
@@ -511,10 +516,18 @@
     footer a { color:var(--ink); font-weight:650; text-decoration:underline; text-underline-offset:2px; }
     footer a:hover { color:var(--brand); }
 
+    @media (min-width:641px) and (max-width:1100px){
+      :root { --header-top-pad: max(36px, calc(env(safe-area-inset-top, 0px) + 24px)); }
+    }
+
     @media (max-width:640px){
-      body { padding:max(12px,env(safe-area-inset-top)) 12px calc(28px + env(safe-area-inset-bottom)); }
+      :root {
+        --page-top-gutter: max(12px, env(safe-area-inset-top, 0px));
+        --header-top-pad: max(24px, calc(env(safe-area-inset-top, 0px) + 12px));
+      }
+      body { padding:var(--page-top-gutter) 12px calc(28px + env(safe-area-inset-bottom)); }
       header.hero {
-        margin-top:calc(-1 * max(12px,env(safe-area-inset-top)));
+        margin-top:calc(-1 * var(--page-top-gutter));
         margin-bottom:18px;
         padding-inline:12px;
       }
@@ -807,7 +820,22 @@
     // ---- greeting + date ----
     (function () {
       const h = new Date().getHours();
-      const g = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+      const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+      const GREETINGS = {
+        lateNight: ["Middle watch", "Quiet seas tonight", "Night watch", "Still at anchor", "Calm waters"],
+        dawn: ["First light", "Dawn watch", "Fair morning", "Rising tide", "Daybreak on deck"],
+        morning: ["Good morning", "Morning watch", "Fair winds", "Clear horizon", "All hands on deck"],
+        afternoon: ["Good afternoon", "Afternoon watch", "Steady course", "Fair afternoon", "Full sail ahead"],
+        evening: ["Good evening", "Evening watch", "Harbor bound", "Sun astern", "Making port"],
+        night: ["Good night", "Stars on the chart", "Moon on the water", "Last watch", "Anchored for the night"],
+      };
+      let g;
+      if (h < 5) g = pick(GREETINGS.lateNight);
+      else if (h < 9) g = pick(GREETINGS.dawn);
+      else if (h < 12) g = pick(GREETINGS.morning);
+      else if (h < 17) g = pick(GREETINGS.afternoon);
+      else if (h < 21) g = pick(GREETINGS.evening);
+      else g = pick(GREETINGS.night);
       document.getElementById("greeting").textContent = g;
       document.getElementById("today").textContent = new Date().toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
     })();
