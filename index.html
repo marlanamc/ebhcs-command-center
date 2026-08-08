@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Teaching Command Center</title>
+  <meta name="description" content="One place for Drive folders, your teaching sites, pins, and your list." />
+  <meta name="theme-color" content="#0b5252" />
+  <link rel="icon" href="icons/app/icon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+
+  <style>
+    * { box-sizing:border-box; }
+    html { -webkit-text-size-adjust:100%; overflow-x:clip; overscroll-behavior-x:none; }
+    body {
+      margin:0; width:100%; max-width:100%; overflow-x:clip; overscroll-behavior-x:none;
+      touch-action:pan-y pinch-zoom;
+      font-family:var(--sans); color:var(--ink); line-height:1.5;
+      background:var(--canvas-bg);
+      -webkit-font-smoothing:antialiased;
+      padding:max(20px,env(safe-area-inset-top)) var(--layout-gutter) calc(40px + env(safe-area-inset-bottom));
+      min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; align-items:stretch;
+    }
+    .wrap {
+      width:100%; max-width:min(var(--layout-max),100%); margin-inline:auto; min-width:0;
+      flex:1 0 auto; display:flex; flex-direction:column;
+    }
+    a { color:inherit; }
+    .skip-link {
+      position:absolute; left:16px; top:-100%; z-index:100; padding:10px 14px;
+      border-radius:var(--radius); background:var(--card); color:var(--ink);
+      font-weight:650; border:1px solid var(--line); box-shadow:var(--shadow);
+      text-decoration:none;
+    }
+    .skip-link:focus { position:fixed; top:max(16px,env(safe-area-inset-top)); left:16px; outline:none; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    /* ---- header ------------------------------------------------------ */
+    header.hero {
+      margin-inline:calc(50% - 50vw);
+      margin-top:calc(-1 * max(20px,env(safe-area-inset-top)));
+      margin-bottom:26px;
+      padding-inline:var(--layout-gutter);
+      background:var(--hero-bg);
+      border-bottom:1px solid var(--line);
+      position:relative;
+      overflow:hidden;
+    }
+    /* Quiet wave line — the one nautical motif, confined to the header band */
+    header.hero::after {
+      content:"";
+      position:absolute; left:0; right:0; bottom:-1px; height:34px;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24' preserveAspectRatio='none'%3E%3Cpath d='M0 16 Q 25 4 50 16 T 100 16 T 150 16 T 200 16 T 250 16 T 300 16' fill='none' stroke='%234fc3c3' stroke-opacity='0.16' stroke-width='2'/%3E%3C/svg%3E");
+      background-repeat:repeat-x; background-size:300px 24px;
+      opacity:.7;
+    }
+    .hero-inner {
+      display:flex; align-items:center; flex-wrap:wrap; gap:4px 12px;
+      max-width:min(var(--layout-max),100%); margin-inline:auto; padding:18px 0 16px;
+      min-width:0; position:relative; z-index:1;
+    }
+    .brand-mark {
+      flex:none; width:34px; height:34px; border-radius:50%;
+      display:grid; place-items:center;
+      background:color-mix(in srgb, var(--brand) 16%, var(--card));
+      color:var(--brand-deep);
+      border:1px solid color-mix(in srgb, var(--brand) 30%, var(--line));
+    }
+    .brand-mark svg { width:18px; height:18px; }
+    h1 {
+      font-family:var(--sans); font-weight:750; font-size:clamp(20px,2.6vw,26px);
+      line-height:1.1; letter-spacing:-0.025em; color:var(--ink); margin:0;
+    }
+    .head-meta { display:flex; align-items:baseline; gap:7px; min-width:0; margin-left:auto; flex:none; }
+    .greeting { font-size:13px; font-weight:650; line-height:1.3; color:var(--ink); }
+    .today { font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .today::before { content:"·"; margin-right:7px; color:var(--faint); }
+    .head-right { display:flex; align-items:center; gap:8px; flex:none; }
+    .icon-btn {
+      width:44px; height:44px; display:grid; place-items:center; background:var(--card);
+      border:1px solid var(--line); border-radius:999px; color:var(--ink); cursor:pointer;
+      box-shadow:var(--shadow); transition:transform .17s, border-color .17s;
+    }
+    .icon-btn:hover { transform:translateY(-1px); border-color:color-mix(in srgb,var(--brand) 45%,var(--line)); }
+    .icon-btn svg { width:20px; height:20px; }
+    .icon-btn:focus-visible {
+      outline:none;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
+
+    /* ---- search ------------------------------------------------------ */
+    .search-wrap { margin-bottom:28px; }
+    .search-box {
+      display:flex; align-items:center; gap:10px;
+      background:var(--card); border:1px solid var(--line); border-radius:999px;
+      padding:11px 16px; box-shadow:var(--shadow);
+    }
+    .search-box svg { width:16px; height:16px; color:var(--faint); flex:none; }
+    .search-box input {
+      font:inherit; font-size:14.5px; flex:1; min-width:0; border:0; background:transparent;
+      color:var(--ink); outline:none;
+    }
+    .search-box input::placeholder { color:var(--faint); }
+    .search-box:focus-within { border-color:color-mix(in srgb,var(--brand) 45%,var(--line)); }
+    .search-kbd {
+      flex:none; font-size:11px; font-weight:650; color:var(--faint);
+      border:1px solid var(--line); border-radius:5px; padding:2px 6px;
+    }
+
+    /* ---- layout -------------------------------------------------------
+       Left column: tile sections. Right column: pins + list. */
+    main.cols { margin-top:0; min-width:0; max-width:100%; margin-bottom:40px; }
+    @media (min-width:960px){
+      .cols {
+        display:grid;
+        grid-template-columns:minmax(0,63fr) minmax(300px,37fr);
+        gap:44px;
+        align-items:start;
+      }
+      .col { display:flex; flex-direction:column; gap:34px; min-width:0; }
+    }
+    @media (max-width:959px){
+      .cols { display:flex; flex-direction:column; gap:30px; }
+      .col { display:flex; flex-direction:column; gap:30px; min-width:0; max-width:100%; }
+    }
+
+    .panel { min-width:0; }
+    .panel-head { margin:0 0 12px; padding-bottom:7px; border-bottom:1px solid var(--line);
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .panel-title {
+      display:flex; align-items:center; gap:8px; font-size:11px; font-weight:700;
+      letter-spacing:.16em; text-transform:uppercase; color:var(--earth-deep); margin:0;
+    }
+    .panel-title::before { content:""; flex:none; width:4px; height:11px; border-radius:2px; background:var(--earth); }
+    .head-actions { margin-left:auto; display:flex; gap:6px; align-items:center; }
+
+    /* ---- tile grid (Drive / Websites) --------------------------------- */
+    .tile-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px; }
+    .tile {
+      --accent:var(--brand);
+      display:flex; align-items:flex-start; gap:12px; text-decoration:none; color:inherit;
+      background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+      padding:14px 15px; min-width:0; box-shadow:var(--shadow);
+      transition:transform .15s, border-color .15s, box-shadow .15s;
+    }
+    .tile:hover {
+      transform:translateY(-2px);
+      border-color:color-mix(in srgb, var(--accent) 45%, var(--line));
+      box-shadow:var(--shadow-lg);
+    }
+    .tile:focus-visible {
+      outline:none;
+      box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent), var(--shadow);
+    }
+    .tile-mono {
+      flex:none; width:38px; height:38px; border-radius:10px;
+      display:grid; place-items:center;
+      font-family:var(--sans); font-weight:700; font-size:14px;
+      color:var(--accent);
+      background:color-mix(in srgb, var(--accent) 15%, var(--card));
+      border:1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+    }
+    .tile-mono img, .tile-mono svg { width:19px; height:19px; display:block; }
+    .tile-body { min-width:0; flex:1; }
+    .tile-name { font-size:14.5px; font-weight:650; line-height:1.3; margin:0 0 2px; }
+    .tile-desc { font-size:12.5px; color:var(--muted); line-height:1.4; margin:0; overflow-wrap:anywhere; }
+    .tile.is-soon { opacity:.55; pointer-events:none; }
+    .tile-soon-tag {
+      display:inline-block; margin-top:6px; font-size:10px; font-weight:700; letter-spacing:.06em;
+      text-transform:uppercase; color:var(--faint); border:1px solid var(--line); border-radius:999px;
+      padding:1px 7px;
+    }
+
+    /* ---- shared empty state (pins, list) ------------------------------ */
+    .list-empty { color:var(--faint); font-size:14px; text-align:center; padding:16px 8px; }
+
+    /* ---- jump links (pins) --------------------------------------------- */
+    .links { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; }
+    .links a {
+      --link-accent:var(--earth);
+      display:flex; align-items:center; gap:11px; text-decoration:none; padding:10px 4px;
+      border-radius:7px; border:0; border-bottom:1px solid var(--line-soft);
+      background:transparent;
+      transition:background .15s, border-color .15s;
+    }
+    .links > li:last-child a { border-bottom:none; }
+    .links a:hover {
+      background:var(--hover-tint); border-bottom-color:transparent;
+      box-shadow:inset 2px 0 0 var(--link-accent);
+    }
+    .link-icon {
+      width:24px; height:24px; border-radius:50%; flex:none;
+      display:grid; place-items:center;
+      background:color-mix(in srgb,var(--link-accent) 16%,var(--card));
+      color:var(--link-accent);
+      border:1px solid color-mix(in srgb,var(--link-accent) 22%,var(--line));
+    }
+    .link-icon svg { width:13px; height:13px; display:block; }
+    .links .lname { font-size:14.5px; font-weight:600; flex:1; min-width:0; line-height:1.35; }
+    .links .larr {
+      flex:none; width:20px; height:20px; border-radius:999px;
+      display:grid; place-items:center; font-size:13px; line-height:1;
+      color:var(--muted); background:transparent;
+      opacity:.7; transition:opacity .15s, transform .15s, color .15s;
+    }
+    .links a:hover .larr { color:var(--link-accent); opacity:1; transform:translate(1px,-1px); }
+    .links a:focus-visible {
+      outline:none;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--link-accent) 40%,transparent);
+    }
+
+    /* ---- sidebar (pins + list) ----------------------------------------- */
+    .sidebar .panel-head { margin-bottom:10px; }
+    .sidebar .head-link {
+      font:inherit; font-size:13px; font-weight:650; color:var(--brand);
+      background:none; border:0; padding:0; cursor:pointer; text-decoration:none;
+    }
+    .sidebar .head-link:hover { text-decoration:underline; text-underline-offset:2px; }
+    .sidebar .head-link[aria-pressed="true"] { color:var(--brand-deep); }
+    .sidebar .head-link:focus-visible {
+      outline:none; border-radius:4px;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
+    .sidebar .links a { padding:11px 4px; gap:10px; }
+    .sidebar .links a:hover { background:var(--hover-tint); border-bottom-color:var(--line-soft); box-shadow:none; }
+    .sidebar .link-icon { width:20px; height:20px; background:var(--link-accent); color:var(--on-accent); border:none; }
+    .sidebar .link-icon svg { width:11px; height:11px; }
+    .sidebar .links .lname { font-size:14px; font-weight:600; }
+    .sidebar .links .larr { width:auto; height:auto; font-size:13px; opacity:.5; transform:none; }
+    .sidebar .links a:hover .larr { opacity:.85; transform:none; }
+    .sidebar .list-empty { text-align:left; padding:8px 4px 12px; }
+    .sidebar .pin-manage {
+      display:flex; align-items:center; gap:10px;
+      padding:11px 4px; border-bottom:1px solid var(--line-soft);
+    }
+    .sidebar .pin-manage:last-child { border-bottom:none; }
+    .sidebar .pin-manage .pin-label { flex:1; min-width:0; font-size:14px; font-weight:600;
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    /* ---- pins ----------------------------------------------------------- */
+    .pin-row { display:flex; align-items:center; gap:8px; }
+    .pin-row .links { flex:1; min-width:0; }
+    .pin-actions { display:flex; gap:6px; flex:none; }
+    .mini-btn {
+      font:inherit; font-size:12px; font-weight:650; cursor:pointer; color:var(--muted);
+      background:var(--paper-2); border:1px solid var(--line); border-radius:8px;
+      padding:5px 9px; line-height:1.2; transition:border-color .15s, color .15s;
+    }
+    .mini-btn:hover { color:var(--ink); border-color:color-mix(in srgb,var(--brand) 40%,var(--line)); }
+    .mini-btn[aria-pressed="true"] { color:var(--brand-deep); border-color:color-mix(in srgb,var(--brand) 45%,var(--line)); }
+    .mini-btn.icon-only {
+      display:inline-flex; align-items:center; justify-content:center;
+      line-height:0; min-width:28px; min-height:28px; padding:5px 7px;
+    }
+    .mini-btn.icon-only svg { width:14px; height:14px; display:block; flex-shrink:0; }
+    .mini-btn:focus-visible {
+      outline:none;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
+    .mini-btn:disabled { opacity:.45; cursor:default; }
+    .mini-btn:disabled:hover { color:var(--muted); border-color:var(--line); }
+
+    /* ---- pin editor ------------------------------------------------------ */
+    .pin-form { border:0; border-top:1px solid var(--line); border-radius:0; background:transparent; padding:14px 0 4px; margin-top:8px; }
+    .pin-form label { display:block; font-size:11px; font-weight:650; letter-spacing:.06em;
+      text-transform:uppercase; color:var(--faint); margin:0 0 4px; }
+    .pin-form input[type="text"], .pin-form input[type="url"] {
+      font:inherit; font-size:14px; width:100%; color:var(--ink); background:var(--card);
+      border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin-bottom:10px;
+    }
+    .pin-form input:focus { outline:none; border-color:var(--brand); }
+    .swatches { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .swatch {
+      width:26px; height:26px; border-radius:50%; cursor:pointer; padding:0;
+      border:2px solid transparent; box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);
+    }
+    .swatch[aria-pressed="true"] { border-color:var(--ink); }
+    .swatch:focus-visible {
+      outline:none;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
+    .form-actions { display:flex; gap:8px; align-items:center; }
+    .btn-sm { font:inherit; font-size:13px; font-weight:650; cursor:pointer; border-radius:8px; padding:7px 13px; }
+    .btn-primary { background:var(--brand); border:1px solid var(--brand); color:var(--on-accent); }
+    .btn-ghost { background:transparent; border:1px solid var(--line); color:var(--muted); }
+    .btn-danger { background:transparent; border:1px solid var(--line); color:var(--danger); margin-left:auto; }
+    .btn-sm:focus-visible {
+      outline:none;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
+
+    /* ---- my list ----------------------------------------------------- */
+    .sidebar .todo-add { margin-bottom:10px; }
+    .sidebar .todo-add[hidden] { display:none; }
+    .sidebar .todo-add input { padding:9px 11px; font-size:14px; }
+    .sidebar .todo-add .btn-primary {
+      flex:none; background:var(--ink); border-color:var(--ink);
+      padding:10px 14px; border-radius:8px;
+    }
+    .sidebar .todo-add .btn-primary:hover { background:color-mix(in srgb,var(--ink) 88%,var(--brand)); border-color:color-mix(in srgb,var(--ink) 88%,var(--brand)); }
+    .sidebar .todo { padding:11px 4px; align-items:center; }
+    .sidebar .todo-check { width:16px; height:16px; border-radius:3px; margin-top:0; }
+    .sidebar .todo.done .todo-check { background:var(--ok); border-color:var(--ok); }
+    .sidebar .todo-text { font-size:14px; line-height:1.4; }
+    .todo-add { display:flex; gap:8px; margin-bottom:12px; }
+    .todo-add input {
+      font:inherit; font-size:14px; flex:1; min-width:0; color:var(--ink); background:var(--card);
+      border:1px solid var(--line); border-radius:var(--radius); padding:10px 12px;
+    }
+    .todo-add input:focus { outline:none; border-color:var(--brand); background:var(--card); }
+    .todos { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; }
+    .todo {
+      display:flex; align-items:flex-start; gap:10px; padding:10px 4px;
+      border:0; border-bottom:1px solid var(--line-soft); border-radius:7px;
+      background:transparent;
+      transition:background .15s, border-color .15s, opacity .15s;
+    }
+    .todos > .todo:last-child { border-bottom:none; }
+    .todo:hover { background:var(--hover-tint); border-bottom-color:transparent; }
+    .todo-check {
+      flex:none; width:18px; height:18px; margin-top:1px; border-radius:5px; cursor:pointer; padding:0;
+      border:1.5px solid var(--idle); background:transparent; display:grid; place-items:center; color:var(--on-accent);
+    }
+    .todo-check svg { width:12px; height:12px; opacity:0; }
+    .todo.done .todo-check { background:var(--ok); border-color:var(--ok); }
+    .todo.done .todo-check svg { opacity:1; }
+    .todo-text {
+      flex:1; min-width:0; font-size:14px; line-height:1.45; cursor:text;
+      word-break:break-word; white-space:pre-wrap;
+    }
+    .todo.done { opacity:.55; }
+    .todo.done .todo-text { text-decoration:line-through; }
+    .todo-edit {
+      font:inherit; font-size:14px; flex:1; min-width:0; color:var(--ink);
+      background:var(--card); border:1px solid var(--brand); border-radius:6px; padding:3px 6px;
+    }
+    .todo-edit:focus { outline:none; box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent); }
+    .todo-actions {
+      flex:none; display:flex; align-items:center; gap:6px;
+      opacity:0; transition:opacity .15s;
+    }
+    .todo:hover .todo-actions, .todo-actions:focus-within { opacity:1; }
+    .todo-actions .mini-btn { padding:3px 6px; font-size:12px; line-height:1; }
+    .todo-del {
+      flex:none; background:none; border:0; cursor:pointer; color:var(--faint);
+      font-size:15px; line-height:1; padding:2px 4px; border-radius:6px; transition:color .15s;
+    }
+    .todo-del:hover { color:var(--danger); }
+    .todo-del:focus-visible {
+      outline:none;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
+    .todo-check:focus-visible {
+      outline:none;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
+    .todo-text:focus-visible {
+      outline:none; border-radius:6px;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
+    .todo-foot { display:flex; align-items:center; gap:10px; margin-top:12px; font-size:12.5px; color:var(--faint); }
+    .todo-foot[hidden] { display:none; }
+    .link-btn { font:inherit; font-size:12.5px; background:none; border:0; padding:0; cursor:pointer;
+      color:var(--muted); text-decoration:underline; text-underline-offset:2px; }
+    .link-btn:hover { color:var(--brand); }
+    .link-btn:focus-visible {
+      outline:none;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
+
+    /* ---- sync status ---------------------------------------------------- */
+    .sync-note { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--faint); }
+    .sync-dot { width:7px; height:7px; border-radius:50%; background:var(--idle); flex:none; }
+    .sync-note[data-state="saving"] .sync-dot { background:var(--wait); }
+    .sync-note[data-state="saved"]  .sync-dot { background:var(--ok); }
+    .sync-note[data-state="local"]  .sync-dot { background:var(--idle); }
+    .sync-note[data-state="error"]  .sync-dot { background:var(--danger); }
+
+    footer {
+      display:flex; align-items:baseline; justify-content:space-between;
+      flex-wrap:wrap; gap:6px 18px;
+      margin-top:auto; padding-top:14px; border-top:1px solid var(--line);
+      color:var(--muted); font-size:12.5px; text-align:left;
+    }
+    footer a { color:var(--ink); font-weight:650; text-decoration:underline; text-underline-offset:2px; }
+    footer a:hover { color:var(--brand); }
+
+    @media (max-width:640px){
+      body { padding:max(12px,env(safe-area-inset-top)) 12px calc(28px + env(safe-area-inset-bottom)); }
+      header.hero {
+        margin-top:calc(-1 * max(12px,env(safe-area-inset-top)));
+        margin-bottom:18px;
+        padding-inline:12px;
+      }
+      .hero-inner { padding:14px 0 12px; gap:12px; }
+      .head-meta { margin-left:0; }
+      .todo, .links a, .tile { min-height:48px; }
+    }
+
+    @media (hover: none) {
+      .todo-actions { opacity:1; }
+      .tile:hover, .links a:hover, .icon-btn:hover { transform:none; }
+    }
+    .todo-check, .todo-del, .todo-actions .mini-btn, .pin-actions .mini-btn { position:relative; }
+    .todo-check::after, .todo-del::after,
+    .todo-actions .mini-btn::after, .pin-actions .mini-btn::after {
+      content:""; position:absolute; inset:-3px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ * { transition:none !important; } }
+  </style>
+  <script>
+    try { var t = localStorage.getItem("tcc-theme"); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#board">Skip to links</a>
+  <div class="wrap">
+    <header class="hero">
+      <div class="hero-inner">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v13"/><path d="M8 19a4 4 0 0 0 8 0"/><path d="M4 10h16l-1.5 5.5a2 2 0 0 1-1.93 1.5H7.43a2 2 0 0 1-1.93-1.5L4 10Z"/>
+          </svg>
+        </span>
+        <h1>Teaching Command Center</h1>
+        <div class="head-meta">
+          <span class="greeting" id="greeting"></span>
+          <span class="today" id="today"></span>
+        </div>
+        <div class="head-right">
+          <button class="icon-btn" id="themeToggle" type="button" aria-label="Switch color theme"></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="searchInput" placeholder="Search your links…" aria-label="Search links" autocomplete="off" />
+        <span class="search-kbd" aria-hidden="true">/</span>
+      </div>
+    </div>
+
+    <main class="cols" id="board">
+      <!-- LEFT: Drive + Websites -->
+      <div class="col">
+        <section class="panel" data-section="Google Drive">
+          <div class="panel-head">
+            <h2 class="panel-title">Google Drive</h2>
+          </div>
+          <div class="tile-grid" id="tiles-drive"></div>
+        </section>
+
+        <section class="panel" data-section="My Websites">
+          <div class="panel-head">
+            <h2 class="panel-title">My Websites</h2>
+          </div>
+          <div class="tile-grid" id="tiles-sites"></div>
+        </section>
+      </div>
+
+      <!-- RIGHT: pins + list -->
+      <div class="col sidebar">
+        <section class="panel">
+          <div class="panel-head">
+            <h2 class="panel-title">Pins</h2>
+            <div class="head-actions">
+              <button class="head-link" type="button" id="pinManage" aria-pressed="false">Manage</button>
+            </div>
+          </div>
+          <ul class="links" id="pins"></ul>
+          <div id="pinEditor"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2 class="panel-title">List</h2>
+            <div class="head-actions">
+              <button class="head-link" type="button" id="todoAddToggle" aria-expanded="false" aria-controls="todoAdd">Add</button>
+            </div>
+          </div>
+          <form class="todo-add" id="todoAdd" hidden>
+            <input id="todoInput" type="text" placeholder="Add something…" maxlength="300"
+                   autocomplete="off" aria-label="Add a list item" />
+            <button class="btn-sm btn-primary" type="submit">Add</button>
+            <button class="btn-sm btn-ghost" type="button" id="todoAddCancel">Cancel</button>
+          </form>
+          <ul class="todos" id="todos"></ul>
+          <div class="todo-foot" id="todoFoot" hidden>
+            <button class="link-btn" type="button" id="clearDone">Clear finished</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <span>Teaching Command Center</span>
+      <span id="syncSlot" role="status" aria-live="polite"></span>
+    </footer>
+  </div>
+
+  <script>
+    /* =====================================================================
+       EDIT HERE — this is the part you'll touch to add/change tiles.
+
+       Each entry: { name, desc, url, mono (a letter) OR icon (path to an svg),
+       accent (any CSS color), section: "drive" | "sites" }.
+       "soon: true" marks a tile that isn't live yet — dimmed, unclickable.
+       ===================================================================== */
+    const TILES = [
+      // ---- Google Drive — swap these placeholder URLs for your real folder links ----
+      { section:"drive", name:"Materials", desc:"Lesson materials and handouts", url:"https://drive.google.com/", mono:"M", accent:"var(--hue-1)" },
+      { section:"drive", name:"Admin", desc:"Admin paperwork and forms", url:"https://drive.google.com/", mono:"A", accent:"var(--hue-2)" },
+      { section:"drive", name:"Workforce Data Analyst", desc:"WDA program folder", url:"https://drive.google.com/", mono:"W", accent:"var(--hue-3)" },
+
+      // ---- My Websites ----
+      { section:"sites", name:"ESOL LMS", desc:"myesolclass.com", url:"https://myesolclass.com/", mono:"E", accent:"var(--hue-4)" },
+      { section:"sites", name:"Resources Page", desc:"ESOL Level 3 resources", url:"https://esol-level-3.vercel.app/", mono:"R", accent:"var(--hue-5)" },
+      { section:"sites", name:"Advisor Bulletin Board", desc:"EBHCS job board", url:"https://ebhcsjobboard.web.app/", mono:"B", accent:"var(--hue-6)" },
+      { section:"sites", name:"Advisor Portal", desc:"EBHCS job board — admin", url:"https://ebhcsjobboard.web.app/admin", mono:"P", accent:"var(--hue-7)" },
+    ];
+    /* ===================================================================== */
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+
+    function renderTiles(){
+      const groups = { drive: [], sites: [] };
+      TILES.forEach(t => { if (groups[t.section]) groups[t.section].push(t); });
+      const mount = (id, items) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = items.map(t => {
+          const soon = t.soon ? ' is-soon' : '';
+          const tag = t.soon ? '<span class="tile-soon-tag">Soon</span>' : '';
+          const inner = t.icon
+            ? `<img src="${t.icon}" alt="" />`
+            : `${escapeHtml(t.mono || "?")}`;
+          const tagEl = t.soon
+            ? `<a class="tile${soon}" style="--accent:${t.accent || 'var(--brand)'}" aria-disabled="true">`
+            : `<a class="tile" style="--accent:${t.accent || 'var(--brand)'}" href="${escapeHtml(t.url)}" target="_blank" rel="noopener noreferrer">`;
+          return `${tagEl}
+            <span class="tile-mono" aria-hidden="true">${inner}</span>
+            <span class="tile-body">
+              <span class="tile-name">${escapeHtml(t.name)}</span>
+              <span class="tile-desc">${escapeHtml(t.desc || "")}</span>
+              ${tag}
+            </span>
+          </a>`;
+        }).join("");
+      };
+      mount("tiles-drive", groups.drive);
+      mount("tiles-sites", groups.sites);
+    }
+    renderTiles();
+
+    // ---- search: filters tiles across both sections ----
+    const searchInput = document.getElementById("searchInput");
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "/" && document.activeElement !== searchInput && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.trim().toLowerCase();
+      document.querySelectorAll(".tile-grid .tile").forEach(el => {
+        const text = el.textContent.toLowerCase();
+        el.style.display = !q || text.includes(q) ? "" : "none";
+      });
+    });
+
+    // ---- greeting + date ----
+    (function () {
+      const h = new Date().getHours();
+      const g = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+      document.getElementById("greeting").textContent = g;
+      document.getElementById("today").textContent = new Date().toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
+    })();
+
+    // ---- theme toggle ----
+    (function () {
+      const btn = document.getElementById("themeToggle");
+      const sunIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
+      const moonIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>';
+      function current(){
+        const t = document.documentElement.dataset.theme;
+        if (t) return t;
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function paint(){
+        btn.innerHTML = current() === "dark" ? sunIcon : moonIcon;
+        btn.setAttribute("aria-label", current() === "dark" ? "Switch to light theme" : "Switch to dark theme");
+      }
+      btn.addEventListener("click", () => {
+        const next = current() === "dark" ? "light" : "dark";
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem("tcc-theme", next); } catch(e){}
+        paint();
+      });
+      paint();
+    })();
+
+    /* =====================================================================
+       PINS + LIST — synced to Cloudflare KV via /api/data, falls back to
+       localStorage if the KV binding isn't set up yet (or you're offline).
+       ===================================================================== */
+    const LS_KEY = "tcc-data-v1";
+    const API_URL = "/api/data";
+
+    const PIN_COLORS = ["#0f6e6e","#1a5276","#a9822f","#3c6e71","#4c6a92","#96602c","#2f7d7d","#495764"];
+    const uid = () => Math.random().toString(36).slice(2, 10);
+
+    let state = { v:1, pins:[], todos:[], updated:null };
+
+    function loadLocal(){
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (raw) state = JSON.parse(raw);
+      } catch(e){}
+    }
+    function saveLocal(){
+      try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+    }
+
+    const syncSlot = document.getElementById("syncSlot");
+    function setSync(mode){
+      const label = { saving:"Saving…", saved:"Saved", local:"Saved on this device", error:"Couldn't sync" }[mode] || "";
+      syncSlot.innerHTML = `<span class="sync-note" data-state="${mode}"><span class="sync-dot" aria-hidden="true"></span>${label}</span>`;
+    }
+
+    let saveTimer = null;
+    function scheduleSave(){
+      saveLocal();
+      setSync("saving");
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(API_URL, {
+            method:"PUT",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify(state),
+          });
+          if (res.status === 503) { setSync("local"); return; }
+          if (!res.ok) throw new Error("save failed");
+          setSync("saved");
+        } catch(e){
+          setSync("local");
+        }
+      }, 500);
+    }
+
+    async function loadRemote(){
+      try {
+        const res = await fetch(API_URL);
+        if (res.status === 503) { setSync("local"); return; }
+        if (!res.ok) throw new Error("load failed");
+        const data = await res.json();
+        if (data && Array.isArray(data.pins)) {
+          state = data;
+          saveLocal();
+          renderPins();
+          renderTodos();
+          setSync("saved");
+        }
+      } catch(e){
+        setSync("local");
+      }
+    }
+
+    // ---- pins ----
+    const pinsEl = document.getElementById("pins");
+    const pinEditorEl = document.getElementById("pinEditor");
+    const pinManageBtn = document.getElementById("pinManage");
+    let pinManaging = false;
+    let editingPinId = null;
+
+    function renderPins(){
+      if (!state.pins.length) {
+        pinsEl.innerHTML = pinManaging ? "" : `<li class="list-empty">No pins yet — add your most-used link.</li>`;
+      } else if (pinManaging) {
+        pinsEl.innerHTML = state.pins.map(p => `
+          <li class="pin-manage" data-id="${p.id}">
+            <span class="link-icon" style="--link-accent:${p.color}" aria-hidden="true">${p.icon || "•"}</span>
+            <span class="pin-label">${escapeHtml(p.label)}</span>
+            <div class="pin-actions">
+              <button class="mini-btn" type="button" data-edit="${p.id}">Edit</button>
+              <button class="mini-btn" type="button" data-del="${p.id}">Delete</button>
+            </div>
+          </li>`).join("");
+      } else {
+        pinsEl.innerHTML = state.pins.map(p => `
+          <li>
+            <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" style="--link-accent:${p.color}">
+              <span class="link-icon" aria-hidden="true">${p.icon || "•"}</span>
+              <span class="lname">${escapeHtml(p.label)}</span>
+              <span class="larr" aria-hidden="true">↗</span>
+            </a>
+          </li>`).join("");
+      }
+      renderPinEditorList();
+    }
+
+    function renderPinEditorList(){
+      pinsEl.querySelectorAll("[data-edit]").forEach(btn => {
+        btn.addEventListener("click", () => openPinForm(btn.dataset.edit));
+      });
+      pinsEl.querySelectorAll("[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.pins = state.pins.filter(p => p.id !== btn.dataset.del);
+          scheduleSave();
+          renderPins();
+        });
+      });
+    }
+
+    function openPinForm(id){
+      editingPinId = id || null;
+      const pin = id ? state.pins.find(p => p.id === id) : { label:"", url:"", color:PIN_COLORS[0], icon:"" };
+      pinEditorEl.innerHTML = `
+        <form class="pin-form" id="pinForm">
+          <label for="pinLabel">Label</label>
+          <input type="text" id="pinLabel" maxlength="60" required value="${escapeHtml(pin.label)}" />
+          <label for="pinUrl">URL</label>
+          <input type="url" id="pinUrl" maxlength="2048" required value="${escapeHtml(pin.url)}" />
+          <label>Color</label>
+          <div class="swatches" id="pinSwatches">
+            ${PIN_COLORS.map(c => `<button type="button" class="swatch" style="background:${c}" data-color="${c}" aria-pressed="${c === pin.color}" aria-label="Color ${c}"></button>`).join("")}
+          </div>
+          <div class="form-actions">
+            <button class="btn-sm btn-primary" type="submit">${id ? "Save" : "Add pin"}</button>
+            <button class="btn-sm btn-ghost" type="button" id="pinCancel">Cancel</button>
+            ${id ? '<button class="btn-sm btn-danger" type="button" id="pinDelete">Delete</button>' : ""}
+          </div>
+        </form>`;
+      let chosenColor = pin.color;
+      pinEditorEl.querySelectorAll(".swatch").forEach(sw => {
+        sw.addEventListener("click", () => {
+          chosenColor = sw.dataset.color;
+          pinEditorEl.querySelectorAll(".swatch").forEach(s => s.setAttribute("aria-pressed", s === sw ? "true" : "false"));
+        });
+      });
+      document.getElementById("pinCancel").addEventListener("click", closePinForm);
+      const delBtn = document.getElementById("pinDelete");
+      if (delBtn) delBtn.addEventListener("click", () => {
+        state.pins = state.pins.filter(p => p.id !== id);
+        scheduleSave();
+        closePinForm();
+        renderPins();
+      });
+      document.getElementById("pinForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const label = document.getElementById("pinLabel").value.trim();
+        let url = document.getElementById("pinUrl").value.trim();
+        if (!label || !url) return;
+        if (!/^[a-z][a-z0-9+.-]*:/i.test(url)) url = "https://" + url;
+        if (id) {
+          const p = state.pins.find(x => x.id === id);
+          Object.assign(p, { label, url, color: chosenColor, icon: pin.icon || "" });
+        } else {
+          if (state.pins.length >= 40) return;
+          state.pins.push({ id: uid(), label, url, color: chosenColor, icon:"" });
+        }
+        scheduleSave();
+        closePinForm();
+        renderPins();
+      });
+    }
+    function closePinForm(){ editingPinId = null; pinEditorEl.innerHTML = ""; }
+
+    pinManageBtn.addEventListener("click", () => {
+      pinManaging = !pinManaging;
+      pinManageBtn.setAttribute("aria-pressed", String(pinManaging));
+      pinManageBtn.textContent = pinManaging ? "Done" : "Manage";
+      if (!pinManaging) closePinForm();
+      else openPinForm(null);
+      renderPins();
+    });
+
+    // ---- todos ----
+    const todosEl = document.getElementById("todos");
+    const todoAddToggle = document.getElementById("todoAddToggle");
+    const todoAddForm = document.getElementById("todoAdd");
+    const todoInput = document.getElementById("todoInput");
+    const todoAddCancel = document.getElementById("todoAddCancel");
+    const todoFoot = document.getElementById("todoFoot");
+    const clearDoneBtn = document.getElementById("clearDone");
+
+    function renderTodos(){
+      if (!state.todos.length) {
+        todosEl.innerHTML = `<li class="list-empty">Nothing on your list yet.</li>`;
+        todoFoot.hidden = true;
+        return;
+      }
+      todosEl.innerHTML = state.todos.map(t => `
+        <li class="todo${t.done ? " done" : ""}" data-id="${t.id}">
+          <button class="todo-check" type="button" aria-label="${t.done ? "Mark not done" : "Mark done"}" data-check="${t.id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
+          <span class="todo-text" data-text="${t.id}">${escapeHtml(t.text)}</span>
+          <span class="todo-actions">
+            <button class="todo-del" type="button" aria-label="Delete" data-del="${t.id}">✕</button>
+          </span>
+        </li>`).join("");
+      todoFoot.hidden = !state.todos.some(t => t.done);
+      todosEl.querySelectorAll("[data-check]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const t = state.todos.find(x => x.id === btn.dataset.check);
+          t.done = !t.done;
+          scheduleSave();
+          renderTodos();
+        });
+      });
+      todosEl.querySelectorAll("[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.todos = state.todos.filter(x => x.id !== btn.dataset.del);
+          scheduleSave();
+          renderTodos();
+        });
+      });
+      todosEl.querySelectorAll("[data-text]").forEach(span => {
+        span.addEventListener("click", () => {
+          const id = span.dataset.text;
+          const t = state.todos.find(x => x.id === id);
+          const input = document.createElement("input");
+          input.type = "text";
+          input.className = "todo-edit";
+          input.value = t.text;
+          input.maxLength = 300;
+          span.replaceWith(input);
+          input.focus();
+          input.setSelectionRange(input.value.length, input.value.length);
+          const commit = () => {
+            const v = input.value.trim();
+            if (v) t.text = v;
+            scheduleSave();
+            renderTodos();
+          };
+          input.addEventListener("blur", commit);
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); input.blur(); }
+            if (e.key === "Escape") { renderTodos(); }
+          });
+        });
+      });
+    }
+
+    todoAddToggle.addEventListener("click", () => {
+      const open = todoAddForm.hidden;
+      todoAddForm.hidden = !open;
+      todoAddToggle.setAttribute("aria-expanded", String(open));
+      if (open) todoInput.focus();
+    });
+    todoAddCancel.addEventListener("click", () => {
+      todoAddForm.hidden = true;
+      todoAddToggle.setAttribute("aria-expanded", "false");
+      todoInput.value = "";
+    });
+    todoAddForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = todoInput.value.trim();
+      if (!text) return;
+      if (state.todos.length >= 300) return;
+      state.todos.unshift({ id: uid(), text, done:false, created: new Date().toISOString() });
+      todoInput.value = "";
+      scheduleSave();
+      renderTodos();
+    });
+    clearDoneBtn.addEventListener("click", () => {
+      state.todos = state.todos.filter(t => !t.done);
+      scheduleSave();
+      renderTodos();
+    });
+
+    loadLocal();
+    renderPins();
+    renderTodos();
+    loadRemote();
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

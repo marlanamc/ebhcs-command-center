@@ -1,0 +1,176 @@
+/* ============================================================================
+   Teaching Command Center — shared design tokens
+   Nautical palette: cool fog-grey paper by day, deep navy hull by night, with
+   a harbor-teal interactive signal and a brass/rope structural accent. Built
+   to sit next to the Training Unit Command Center's warm paper + steel-blue
+   look and read as unmistakably different at a glance.
+   ========================================================================= */
+:root {
+  /* Neutrals — cool fog paper ladder */
+  --paper: #eef1f3;
+  --paper-deep: #dde3e7;
+  --paper-2: #e4e9ec;
+  --hover-tint: #ffffff;
+  --card: #ffffff;
+  --line: #cdd6db;
+  --line-soft: #dbe2e6;
+  --ink: #12181d;
+  --muted: #4a565d;
+  --faint: #66747b;
+
+  /* Brand — harbor teal (interactive signal ONLY: focus, links, toggles, primary buttons) */
+  --brand: #0f6e6e;
+  --brand-deep: #0b5252;
+  --brand-tint: #e4f1f0;
+  --on-accent: #ffffff;
+
+  /* Earth — brass / rope (structural warmth: panel ticks, eyebrows, notices) */
+  --earth: #a9822f;
+  --earth-deep: #8a6a22;
+  --earth-tint: #f7f0e0;
+  --warm: #b9773a;
+  --warm-deep: #96602c;
+  --warm-tint: #faf0e4;
+
+  /* Signal hues — per-tile accents, kept in the navy/teal/brass family */
+  --hue-1: #0f6e6e;
+  --hue-1-tint: #e4f1f0;
+  --hue-2: #1a5276;
+  --hue-2-tint: #e6eef4;
+  --hue-3: #a9822f;
+  --hue-3-tint: #f7f0e0;
+  --hue-4: #3c6e71;
+  --hue-4-tint: #e8f0f0;
+  --hue-5: #4c6a92;
+  --hue-5-tint: #e9edf3;
+  --hue-6: #2f7d7d;
+  --hue-6-tint: #e3f2f1;
+  --hue-7: #495764;
+  --hue-7-tint: #eaedf0;
+  --hue-8: #96602c;
+  --hue-8-tint: #f4e9dc;
+
+  /* Page canvas — flat fog. The one gradient lives in the header band alone. */
+  --canvas-bg: var(--paper);
+  --hero-bg: linear-gradient(112deg, var(--card) 38%, color-mix(in srgb, #0b5252 14%, var(--card)) 100%);
+
+  /* Status — lifecycle states (kept for parity with reused component CSS) */
+  --ok: #1a7f5a;
+  --wait: #1a5276;
+  --idle: #7c8a92;
+  --overdue: #b3402c;
+  --danger: #b3402c;
+  --working: #b9773a;
+
+  /* Typography */
+  --sans: "Geist", "Segoe UI Variable", "Segoe UI", "Inter", system-ui, sans-serif;
+
+  /* Layout */
+  --layout-max: 1160px;
+  --layout-gutter: 24px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --shadow: 0 1px 2px rgba(10, 25, 33, 0.06), 0 9px 28px -9px rgba(10, 25, 33, 0.16);
+  --shadow-lg: 0 3px 10px rgba(10, 25, 33, 0.09), 0 22px 46px -13px rgba(10, 25, 33, 0.22);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0b1420;
+    --paper-deep: #070d15;
+    --paper-2: #101c2a;
+    --hover-tint: #16233333;
+    --hover-tint: #182636;
+    --card: #101c2a;
+    --line: #24374a;
+    --line-soft: #1c2c3d;
+    --ink: #eef4f6;
+    --muted: #9db0bc;
+    --faint: #7b8e9a;
+    --brand: #4fc3c3;
+    --brand-deep: #4fc3c3;
+    --brand-tint: #10302f;
+    --on-accent: #06181a;
+    --earth: #d9b158;
+    --earth-deep: #d9b158;
+    --earth-tint: #2e2612;
+    --warm: #e0a35c;
+    --warm-deep: #e0a35c;
+    --warm-tint: #302411;
+    --hue-1: #4fc3c3;
+    --hue-1-tint: #10302f;
+    --hue-2: #6fa8d6;
+    --hue-2-tint: #10222f;
+    --hue-3: #d9b158;
+    --hue-3-tint: #2e2612;
+    --hue-4: #6fb8ba;
+    --hue-4-tint: #10292a;
+    --hue-5: #8ea6c9;
+    --hue-5-tint: #131f2c;
+    --hue-6: #57b8b8;
+    --hue-6-tint: #0e2b2b;
+    --hue-7: #9db0bc;
+    --hue-7-tint: #17222d;
+    --hue-8: #e0a35c;
+    --hue-8-tint: #302411;
+    --canvas-bg: var(--paper);
+    --hero-bg: var(--card);
+    --ok: #4fc98f;
+    --wait: #6fa8d6;
+    --idle: #9db0bc;
+    --overdue: #e08a72;
+    --danger: #e08a72;
+    --working: #e0a35c;
+    --shadow: 0 2px 6px rgba(0, 0, 0, 0.42), 0 8px 28px -6px rgba(0, 0, 0, 0.56);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.52), 0 20px 42px -10px rgba(0, 0, 0, 0.7);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0b1420;
+  --paper-deep: #070d15;
+  --paper-2: #101c2a;
+  --hover-tint: #182636;
+  --card: #101c2a;
+  --line: #24374a;
+  --line-soft: #1c2c3d;
+  --ink: #eef4f6;
+  --muted: #9db0bc;
+  --faint: #7b8e9a;
+  --brand: #4fc3c3;
+  --brand-deep: #4fc3c3;
+  --brand-tint: #10302f;
+  --on-accent: #06181a;
+  --earth: #d9b158;
+  --earth-deep: #d9b158;
+  --earth-tint: #2e2612;
+  --warm: #e0a35c;
+  --warm-deep: #e0a35c;
+  --warm-tint: #302411;
+  --hue-1: #4fc3c3;
+  --hue-1-tint: #10302f;
+  --hue-2: #6fa8d6;
+  --hue-2-tint: #10222f;
+  --hue-3: #d9b158;
+  --hue-3-tint: #2e2612;
+  --hue-4: #6fb8ba;
+  --hue-4-tint: #10292a;
+  --hue-5: #8ea6c9;
+  --hue-5-tint: #131f2c;
+  --hue-6: #57b8b8;
+  --hue-6-tint: #0e2b2b;
+  --hue-7: #9db0bc;
+  --hue-7-tint: #17222d;
+  --hue-8: #e0a35c;
+  --hue-8-tint: #302411;
+  --canvas-bg: var(--paper);
+  --hero-bg: var(--card);
+  --ok: #4fc98f;
+  --wait: #6fa8d6;
+  --idle: #9db0bc;
+  --overdue: #e08a72;
+  --danger: #e08a72;
+  --working: #e0a35c;
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.42), 0 8px 28px -6px rgba(0, 0, 0, 0.56);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.52), 0 20px 42px -10px rgba(0, 0, 0, 0.7);
+}
