@@ -139,41 +139,96 @@
     .panel-title::before { content:""; flex:none; width:4px; height:11px; border-radius:2px; background:var(--earth); }
     .head-actions { margin-left:auto; display:flex; gap:6px; align-items:center; }
 
-    /* ---- tile grid (Drive / Websites) --------------------------------- */
-    .tile-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px; }
-    .tile {
-      --accent:var(--brand);
-      display:flex; align-items:flex-start; gap:12px; text-decoration:none; color:inherit;
-      background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-      padding:14px 15px; min-width:0; box-shadow:var(--shadow);
-      transition:transform .15s, border-color .15s, box-shadow .15s;
+    /* ---- flat source list (Drive / Websites) --------------------------
+       No card chrome — rows separated by hairlines, same language as the
+       Pins/List sidebar. Drive rows can expand to reveal subfolders. */
+    .src-block { margin-bottom:22px; }
+    .src-block:last-child { margin-bottom:0; }
+    .src-head {
+      display:flex; align-items:center; gap:12px; padding:2px 0 16px;
     }
-    .tile:hover {
-      transform:translateY(-2px);
-      border-color:color-mix(in srgb, var(--accent) 45%, var(--line));
-      box-shadow:var(--shadow-lg);
+    .src-head-icon {
+      flex:none; width:34px; height:34px; border-radius:9px; display:grid; place-items:center;
+      background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow);
     }
-    .tile:focus-visible {
-      outline:none;
-      box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent), var(--shadow);
+    .src-head-icon img { width:20px; height:20px; display:block; }
+    .src-head-name { font-size:17px; font-weight:700; flex:1; min-width:0; }
+    .src-head-toggle {
+      flex:none; font:inherit; font-size:13px; font-weight:600; color:var(--muted); background:none; border:0;
+      cursor:pointer; display:flex; align-items:center; gap:5px; padding:4px 2px;
     }
-    .tile-mono {
-      flex:none; width:38px; height:38px; border-radius:10px;
-      display:grid; place-items:center;
-      font-family:var(--sans); font-weight:700; font-size:14px;
-      color:var(--accent);
-      background:color-mix(in srgb, var(--accent) 15%, var(--card));
-      border:1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+    .src-head-toggle svg { width:14px; height:14px; transition:transform .15s; }
+    .src-head-toggle[aria-expanded="true"] svg { transform:rotate(180deg); }
+
+    .src-quick {
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      text-decoration:none; color:var(--muted);
+      font-style:italic; font-size:14px; padding:12px 2px; border-bottom:1px solid var(--line-soft);
+      transition:color .15s;
     }
-    .tile-mono img, .tile-mono svg { width:19px; height:19px; display:block; }
-    .tile-body { min-width:0; flex:1; }
-    .tile-name { font-size:14.5px; font-weight:650; line-height:1.3; margin:0 0 2px; }
-    .tile-desc { font-size:12.5px; color:var(--muted); line-height:1.4; margin:0; overflow-wrap:anywhere; }
-    .tile.is-soon { opacity:.55; pointer-events:none; }
-    .tile-soon-tag {
-      display:inline-block; margin-top:6px; font-size:10px; font-weight:700; letter-spacing:.06em;
+    .src-quick:hover { color:var(--brand); }
+    .src-quick svg { flex:none; width:14px; height:14px; opacity:.6; }
+
+    .src-rows {
+      list-style:none; margin:0; padding:0;
+      display:grid; grid-template-columns:1fr 1fr; grid-auto-flow:row; column-gap:32px;
+    }
+    .src-row { border-bottom:1px solid var(--line-soft); }
+    .src-row-main {
+      display:flex; align-items:center; gap:11px; padding:12px 2px;
+      text-decoration:none; color:inherit; cursor:pointer;
+      background:none; border:0; width:100%; text-align:left; font:inherit;
+      border-radius:6px; transition:background .15s;
+    }
+    a.src-row-main:hover, button.src-row-main:hover { background:var(--hover-tint); }
+    .src-dot { flex:none; width:9px; height:9px; border-radius:50%; background:var(--accent,var(--brand)); }
+    .src-row-name { flex:1; min-width:0; font-size:15px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .src-row-count {
+      flex:none; font-size:13px; color:var(--muted); background:var(--paper-2);
+      border-radius:999px; padding:2px 10px; min-width:22px; text-align:center;
+    }
+    .src-row-chevron { flex:none; width:15px; height:15px; color:var(--faint); transition:transform .15s; }
+    .src-row-chevron.is-open { transform:rotate(90deg); }
+    .src-row-external { flex:none; width:13px; height:13px; color:var(--faint); opacity:.7; }
+
+    .src-sub { list-style:none; margin:0 0 4px; padding:0 0 0 20px; grid-column:1 / -1; }
+    .src-sub .src-row-main { padding:9px 2px; }
+    .src-sub .src-row-name { font-size:14px; font-weight:500; }
+    .src-sub .src-dot { width:7px; height:7px; }
+
+    .src-row.is-soon .src-row-main { opacity:.5; pointer-events:none; }
+    .src-soon-tag {
+      flex:none; font-size:9.5px; font-weight:700; letter-spacing:.06em;
       text-transform:uppercase; color:var(--faint); border:1px solid var(--line); border-radius:999px;
-      padding:1px 7px;
+      padding:1px 6px;
+    }
+    @media (max-width:520px){
+      .src-rows { grid-template-columns:1fr; }
+    }
+
+    /* ---- app grid (My Websites) — icon tiles, two columns ------------- */
+    .app-grid { display:grid; grid-template-columns:1fr 1fr; }
+    .app-tile {
+      display:flex; align-items:center; gap:14px; text-decoration:none; color:inherit;
+      padding:14px 4px; border-bottom:1px solid var(--line-soft);
+      border-radius:8px; transition:background .15s;
+    }
+    .app-tile:hover { background:var(--hover-tint); }
+    .app-tile:nth-child(odd) { padding-right:16px; }
+    .app-tile:nth-child(even) { padding-left:16px; }
+    .app-icon {
+      flex:none; width:44px; height:44px; border-radius:12px; display:grid; place-items:center;
+      font-weight:700; font-size:15px; color:var(--on-accent);
+      background:var(--accent,var(--brand));
+    }
+    .app-icon img { width:100%; height:100%; border-radius:12px; display:block; object-fit:cover; }
+    .app-body { min-width:0; flex:1; display:flex; flex-direction:column; }
+    .app-name { display:block; font-size:15px; font-weight:650; line-height:1.3; margin:0 0 2px; }
+    .app-desc { display:block; font-size:12.5px; color:var(--muted); line-height:1.4; margin:0; overflow-wrap:anywhere; }
+    .app-external { flex:none; width:14px; height:14px; color:var(--faint); }
+    @media (max-width:520px){
+      .app-grid { grid-template-columns:1fr; }
+      .app-tile:nth-child(odd), .app-tile:nth-child(even) { padding-inline:4px; }
     }
 
     /* ---- shared empty state (pins, list) ------------------------------ */
@@ -451,17 +506,14 @@
       <!-- LEFT: Drive + Websites -->
       <div class="col">
         <section class="panel" data-section="Google Drive">
-          <div class="panel-head">
-            <h2 class="panel-title">Google Drive</h2>
-          </div>
-          <div class="tile-grid" id="tiles-drive"></div>
+          <div id="src-drive"></div>
         </section>
 
         <section class="panel" data-section="My Websites">
           <div class="panel-head">
             <h2 class="panel-title">My Websites</h2>
           </div>
-          <div class="tile-grid" id="tiles-sites"></div>
+          <div class="app-grid" id="src-sites"></div>
         </section>
       </div>
 
@@ -507,23 +559,31 @@
 
   <script>
     /* =====================================================================
-       EDIT HERE — this is the part you'll touch to add/change tiles.
+       EDIT HERE — this is the part you'll touch to add/change links.
 
-       Each entry: { name, desc, url, mono (a letter) OR icon (path to an svg),
-       accent (any CSS color), section: "drive" | "sites" }.
-       "soon: true" marks a tile that isn't live yet — dimmed, unclickable.
+       DRIVE_FOLDERS: top-level folders shown as a flat row list. Each can
+       have "subfolders" (an array of the same shape) which expand in place
+       when the row is clicked — no nested links, just an accent dot + name.
+       "openUrl" on a folder puts an italic quick-open link above/below it.
+       "soon: true" dims a row and makes it unclickable.
+
+       SITES: flat row list, same visual language, always a direct link.
        ===================================================================== */
-    const TILES = [
-      // ---- Google Drive — swap these placeholder URLs for your real folder links ----
-      { section:"drive", name:"Materials", desc:"Lesson materials and handouts", url:"https://drive.google.com/", mono:"M", accent:"var(--hue-1)" },
-      { section:"drive", name:"Admin", desc:"Admin paperwork and forms", url:"https://drive.google.com/", mono:"A", accent:"var(--hue-2)" },
-      { section:"drive", name:"Workforce Data Analyst", desc:"WDA program folder", url:"https://drive.google.com/", mono:"W", accent:"var(--hue-3)" },
+    const DRIVE_ROOT_NAME = "FY27";
+    const DRIVE_ROOT_URL = "https://drive.google.com/";
+    const DRIVE_FOLDERS = [
+      { name:"Materials", url:"https://drive.google.com/", accent:"var(--hue-1)" },
+      { name:"Admin", url:"https://drive.google.com/", accent:"var(--hue-2)" },
+      { name:"Workforce Data Analyst", url:"https://drive.google.com/", accent:"var(--hue-3)" },
+      { name:"Old Material", url:"https://drive.google.com/", accent:"var(--hue-4)" },
+    ];
+    const DRIVE_EXTERNAL_URL = "https://drive.google.com/";
 
-      // ---- My Websites ----
-      { section:"sites", name:"ESOL LMS", desc:"myesolclass.com", url:"https://myesolclass.com/", mono:"E", accent:"var(--hue-4)" },
-      { section:"sites", name:"Resources Page", desc:"ESOL Level 3 resources", url:"https://esol-level-3.vercel.app/", mono:"R", accent:"var(--hue-5)" },
-      { section:"sites", name:"Advisor Bulletin Board", desc:"EBHCS job board", url:"https://ebhcsjobboard.web.app/", mono:"B", accent:"var(--hue-6)" },
-      { section:"sites", name:"Advisor Portal", desc:"EBHCS job board — admin", url:"https://ebhcsjobboard.web.app/admin", mono:"P", accent:"var(--hue-7)" },
+    const SITES = [
+      { name:"ESOL LMS", desc:"myesolclass.com", url:"https://myesolclass.com/", mono:"E", accent:"var(--hue-4)" },
+      { name:"Resources Page", desc:"ESOL Level 3 resources", url:"https://esol-level-3.vercel.app/", mono:"R", accent:"var(--hue-5)" },
+      { name:"Advisor Bulletin Board", desc:"EBHCS job board", url:"https://ebhcsjobboard.web.app/", mono:"B", accent:"var(--hue-6)" },
+      { name:"Advisor Portal", desc:"EBHCS job board — admin", url:"https://ebhcsjobboard.web.app/admin", mono:"P", accent:"var(--hue-7)" },
     ];
     /* ===================================================================== */
 
@@ -531,37 +591,100 @@
       return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
     }
 
-    function renderTiles(){
-      const groups = { drive: [], sites: [] };
-      TILES.forEach(t => { if (groups[t.section]) groups[t.section].push(t); });
-      const mount = (id, items) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.innerHTML = items.map(t => {
-          const soon = t.soon ? ' is-soon' : '';
-          const tag = t.soon ? '<span class="tile-soon-tag">Soon</span>' : '';
-          const inner = t.icon
-            ? `<img src="${t.icon}" alt="" />`
-            : `${escapeHtml(t.mono || "?")}`;
-          const tagEl = t.soon
-            ? `<a class="tile${soon}" style="--accent:${t.accent || 'var(--brand)'}" aria-disabled="true">`
-            : `<a class="tile" style="--accent:${t.accent || 'var(--brand)'}" href="${escapeHtml(t.url)}" target="_blank" rel="noopener noreferrer">`;
-          return `${tagEl}
-            <span class="tile-mono" aria-hidden="true">${inner}</span>
-            <span class="tile-body">
-              <span class="tile-name">${escapeHtml(t.name)}</span>
-              <span class="tile-desc">${escapeHtml(t.desc || "")}</span>
-              ${tag}
-            </span>
-          </a>`;
-        }).join("");
-      };
-      mount("tiles-drive", groups.drive);
-      mount("tiles-sites", groups.sites);
-    }
-    renderTiles();
+    const chevronSvg = '<svg class="src-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+    const chevronDownSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+    const externalSvg = '<svg class="src-row-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>';
+    const openSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>';
 
-    // ---- search: filters tiles across both sections ----
+    function renderDrive(){
+      const el = document.getElementById("src-drive");
+      if (!el) return;
+      const rows = DRIVE_FOLDERS.map((f, i) => {
+        const hasSub = Array.isArray(f.subfolders) && f.subfolders.length;
+        const soonCls = f.soon ? " is-soon" : "";
+        const tag = f.soon ? '<span class="src-soon-tag">Soon</span>' : "";
+        const count = hasSub ? `<span class="src-row-count">${f.subfolders.length}</span>` : "";
+        const chevron = hasSub ? chevronSvg : "";
+        const subId = `drive-sub-${i}`;
+        const rowInner = `
+          <span class="src-dot" style="--accent:${f.accent || "var(--brand)"}" aria-hidden="true"></span>
+          <span class="src-row-name">${escapeHtml(f.name)}</span>
+          ${tag}${count}${chevron}`;
+        const mainEl = hasSub
+          ? `<button class="src-row-main" type="button" data-toggle="${subId}" aria-expanded="false" aria-controls="${subId}">${rowInner}</button>`
+          : `<a class="src-row-main" href="${escapeHtml(f.url)}" target="_blank" rel="noopener noreferrer">${rowInner}</a>`;
+        const subList = hasSub ? `
+          <ul class="src-sub" id="${subId}" hidden>
+            ${f.subfolders.map(sf => `
+              <li class="src-row">
+                <a class="src-row-main" href="${escapeHtml(sf.url)}" target="_blank" rel="noopener noreferrer">
+                  <span class="src-dot" style="--accent:${f.accent || "var(--brand)"}" aria-hidden="true"></span>
+                  <span class="src-row-name">${escapeHtml(sf.name)}</span>
+                </a>
+              </li>`).join("")}
+          </ul>` : "";
+        return `<li class="src-row${soonCls}">${mainEl}${subList}</li>`;
+      }).join("");
+
+      el.innerHTML = `
+        <div class="src-head">
+          <span class="src-head-icon" aria-hidden="true"><img src="icons/google-drive.svg" alt="" /></span>
+          <span class="src-head-name">Google Drive</span>
+          <button class="src-head-toggle" type="button" id="driveCollapse" aria-expanded="true" aria-controls="driveBody">
+            <span>${DRIVE_FOLDERS.length} folder${DRIVE_FOLDERS.length === 1 ? "" : "s"}</span>
+            ${chevronDownSvg}
+          </button>
+        </div>
+        <div id="driveBody">
+          <a class="src-quick" href="${escapeHtml(DRIVE_ROOT_URL)}" target="_blank" rel="noopener noreferrer">
+            <span>Open ${escapeHtml(DRIVE_ROOT_NAME)} folder</span>${openSvg}
+          </a>
+          <ul class="src-rows">${rows}</ul>
+          <a class="src-quick" href="${escapeHtml(DRIVE_EXTERNAL_URL)}" target="_blank" rel="noopener noreferrer">
+            <span>Open External Collaboration folder</span>${openSvg}
+          </a>
+        </div>`;
+
+      el.querySelectorAll("[data-toggle]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const sub = document.getElementById(btn.dataset.toggle);
+          const open = sub.hidden;
+          sub.hidden = !open;
+          btn.setAttribute("aria-expanded", String(open));
+          btn.querySelector(".src-row-chevron")?.classList.toggle("is-open", open);
+        });
+      });
+
+      const collapseBtn = document.getElementById("driveCollapse");
+      const driveBody = document.getElementById("driveBody");
+      collapseBtn.addEventListener("click", () => {
+        const open = driveBody.hidden;
+        driveBody.hidden = !open;
+        collapseBtn.setAttribute("aria-expanded", String(open));
+      });
+    }
+
+    function renderSites(){
+      const el = document.getElementById("src-sites");
+      if (!el) return;
+      el.innerHTML = SITES.map(s => {
+        const inner = s.icon ? `<img src="${s.icon}" alt="" />` : escapeHtml(s.mono || "?");
+        return `
+        <a class="app-tile" href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" style="--accent:${s.accent || "var(--brand)"}">
+          <span class="app-icon" aria-hidden="true">${inner}</span>
+          <span class="app-body">
+            <span class="app-name">${escapeHtml(s.name)}</span>
+            <span class="app-desc">${escapeHtml(s.desc || "")}</span>
+          </span>
+          ${externalSvg.replace('src-row-external', 'app-external')}
+        </a>`;
+      }).join("");
+    }
+
+    renderDrive();
+    renderSites();
+
+    // ---- search: filters rows across Drive + Websites ----
     const searchInput = document.getElementById("searchInput");
     document.addEventListener("keydown", (e) => {
       if (e.key === "/" && document.activeElement !== searchInput && !e.metaKey && !e.ctrlKey) {
@@ -571,7 +694,7 @@
     });
     searchInput.addEventListener("input", () => {
       const q = searchInput.value.trim().toLowerCase();
-      document.querySelectorAll(".tile-grid .tile").forEach(el => {
+      document.querySelectorAll("#src-drive > .src-rows > .src-row, #src-sites > .app-tile").forEach(el => {
         const text = el.textContent.toLowerCase();
         el.style.display = !q || text.includes(q) ? "" : "none";
       });
