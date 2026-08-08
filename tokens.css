@@ -6,53 +6,58 @@
    look and read as unmistakably different at a glance.
    ========================================================================= */
 :root {
-  /* Neutrals — cool fog paper ladder */
-  --paper: #eef1f3;
-  --paper-deep: #dde3e7;
-  --paper-2: #e4e9ec;
-  --hover-tint: #ffffff;
-  --card: #ffffff;
-  --line: #cdd6db;
-  --line-soft: #dbe2e6;
-  --ink: #12181d;
-  --muted: #4a565d;
-  --faint: #66747b;
+  /* Neutrals — harbor mist: teal fog over chart paper, not flat office grey */
+  --paper: #e2eaee;
+  --paper-deep: #d1dce2;
+  --paper-2: #d9e3e8;
+  --hover-tint: #f2f8f8;
+  --card: #f6fafa;
+  --line: #bdd0d7;
+  --line-soft: #cedde3;
+  --ink: #0f1a22;
+  --muted: #3f5058;
+  --faint: #5a6b73;
 
   /* Brand — harbor teal (interactive signal ONLY: focus, links, toggles, primary buttons) */
-  --brand: #0f6e6e;
-  --brand-deep: #0b5252;
-  --brand-tint: #e4f1f0;
+  --brand: #0c7272;
+  --brand-deep: #0a5c5c;
+  --brand-tint: #d9eeed;
   --on-accent: #ffffff;
 
   /* Earth — brass / rope (structural warmth: panel ticks, eyebrows, notices) */
-  --earth: #a9822f;
-  --earth-deep: #8a6a22;
-  --earth-tint: #f7f0e0;
-  --warm: #b9773a;
-  --warm-deep: #96602c;
-  --warm-tint: #faf0e4;
+  --earth: #9a7428;
+  --earth-deep: #7d5f1f;
+  --earth-tint: #f5eed8;
+  --warm: #b06f2e;
+  --warm-deep: #925a22;
+  --warm-tint: #f8efe3;
 
   /* Signal hues — per-tile accents, kept in the navy/teal/brass family */
-  --hue-1: #0f6e6e;
-  --hue-1-tint: #e4f1f0;
+  --hue-1: #0c7272;
+  --hue-1-tint: #d9eeed;
   --hue-2: #1a5276;
-  --hue-2-tint: #e6eef4;
-  --hue-3: #a9822f;
-  --hue-3-tint: #f7f0e0;
+  --hue-2-tint: #dce8f0;
+  --hue-3: #9a7428;
+  --hue-3-tint: #f5eed8;
   --hue-4: #3c6e71;
-  --hue-4-tint: #e8f0f0;
+  --hue-4-tint: #dce9ea;
   --hue-5: #4c6a92;
-  --hue-5-tint: #e9edf3;
+  --hue-5-tint: #e3eaf2;
   --hue-6: #2f7d7d;
-  --hue-6-tint: #e3f2f1;
+  --hue-6-tint: #d9eded;
   --hue-7: #495764;
-  --hue-7-tint: #eaedf0;
-  --hue-8: #96602c;
-  --hue-8-tint: #f4e9dc;
+  --hue-7-tint: #e4eaee;
+  --hue-8: #925a22;
+  --hue-8-tint: #f3e8da;
 
-  /* Page canvas — flat fog. The one gradient lives in the header band alone. */
-  --canvas-bg: var(--paper);
-  --hero-bg: linear-gradient(112deg, var(--card) 38%, color-mix(in srgb, #0b5252 14%, var(--card)) 100%);
+  /* Page canvas — soft atmospheric lift; dark mode flattens this back to hull */
+  --canvas-bg: linear-gradient(168deg, #eaf0f3 0%, #dfe8ec 44%, #e6ecef 100%);
+  --hero-bg: linear-gradient(118deg, #f8fbfb 10%, #e5f0ef 50%, color-mix(in srgb, var(--brand-deep) 11%, #e8f2f1) 100%);
+  --chart-grid: color-mix(in srgb, var(--brand) 9%, transparent);
+  --rule-brass: color-mix(in srgb, var(--earth) 42%, transparent);
+  --panel-sidebar-bg: color-mix(in srgb, var(--brand) 4%, var(--card));
+  --panel-sidebar-border: color-mix(in srgb, var(--brand) 12%, var(--line));
+  --panel-sidebar-shadow: var(--shadow);
 
   /* Status — lifecycle states (kept for parity with reused component CSS) */
   --ok: #1a7f5a;
@@ -60,18 +65,19 @@
   --idle: #7c8a92;
   --overdue: #b3402c;
   --danger: #b3402c;
-  --working: #b9773a;
+  --working: #b06f2e;
 
   /* Typography */
   --sans: "Geist", "Segoe UI Variable", "Segoe UI", "Inter", system-ui, sans-serif;
+  --display: "Libre Baskerville", "Iowan Old Style", Georgia, serif;
 
   /* Layout */
   --layout-max: 1160px;
   --layout-gutter: 24px;
   --radius: 12px;
   --radius-lg: 16px;
-  --shadow: 0 1px 2px rgba(10, 25, 33, 0.06), 0 9px 28px -9px rgba(10, 25, 33, 0.16);
-  --shadow-lg: 0 3px 10px rgba(10, 25, 33, 0.09), 0 22px 46px -13px rgba(10, 25, 33, 0.22);
+  --shadow: 0 1px 2px rgba(10, 50, 55, 0.06), 0 8px 26px -6px rgba(11, 60, 65, 0.14);
+  --shadow-lg: 0 3px 10px rgba(10, 50, 55, 0.08), 0 20px 44px -12px rgba(11, 60, 65, 0.18);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -115,6 +121,9 @@
     --hue-8-tint: #302411;
     --canvas-bg: var(--paper);
     --hero-bg: var(--card);
+    --panel-sidebar-bg: transparent;
+    --panel-sidebar-border: transparent;
+    --panel-sidebar-shadow: none;
     --ok: #4fc98f;
     --wait: #6fa8d6;
     --idle: #9db0bc;
@@ -165,6 +174,9 @@
   --hue-8-tint: #302411;
   --canvas-bg: var(--paper);
   --hero-bg: var(--card);
+  --panel-sidebar-bg: transparent;
+  --panel-sidebar-border: transparent;
+  --panel-sidebar-shadow: none;
   --ok: #4fc98f;
   --wait: #6fa8d6;
   --idle: #9db0bc;

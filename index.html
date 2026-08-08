@@ -7,10 +7,14 @@
   <meta name="description" content="One place for Drive folders, your teaching sites, pins, and your list." />
   <meta name="theme-color" content="#0b5252" />
   <link rel="icon" href="icons/app/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/app/icon-512.png" />
   <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Teaching" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="tokens.css" />
 
   <style>
@@ -50,14 +54,26 @@
       position:relative;
       overflow:hidden;
     }
-    /* Quiet wave line — the one nautical motif, confined to the header band */
+    /* Faint chart grid — navigational paper, not decoration for its own sake */
+    header.hero::before {
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(var(--chart-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--chart-grid) 1px, transparent 1px);
+      background-size:28px 28px;
+      mask-image:linear-gradient(to bottom, #000 0%, transparent 78%);
+      opacity:.85;
+    }
+    /* Quiet wave line — confined to the header band */
     header.hero::after {
       content:"";
       position:absolute; left:0; right:0; bottom:-1px; height:34px;
       pointer-events:none;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24' preserveAspectRatio='none'%3E%3Cpath d='M0 16 Q 25 4 50 16 T 100 16 T 150 16 T 200 16 T 250 16 T 300 16' fill='none' stroke='%234fc3c3' stroke-opacity='0.16' stroke-width='2'/%3E%3C/svg%3E");
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24' preserveAspectRatio='none'%3E%3Cpath d='M0 16 Q 25 4 50 16 T 100 16 T 150 16 T 200 16 T 250 16 T 300 16' fill='none' stroke='%230a5c5c' stroke-opacity='0.16' stroke-width='2'/%3E%3C/svg%3E");
       background-repeat:repeat-x; background-size:300px 24px;
-      opacity:.7;
+      opacity:.9;
     }
     .hero-inner {
       display:flex; align-items:center; flex-wrap:wrap; gap:4px 12px;
@@ -70,16 +86,24 @@
       background:color-mix(in srgb, var(--brand) 16%, var(--card));
       color:var(--brand-deep);
       border:1px solid color-mix(in srgb, var(--brand) 30%, var(--line));
+      box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--card) 70%, transparent),
+        0 0 0 2px color-mix(in srgb, var(--earth) 28%, transparent);
     }
     .brand-mark svg { width:18px; height:18px; }
     h1 {
-      font-family:var(--sans); font-weight:750; font-size:clamp(20px,2.6vw,26px);
-      line-height:1.1; letter-spacing:-0.025em; color:var(--ink); margin:0;
+      font-family:var(--display); font-weight:700; font-size:clamp(21px,2.7vw,27px);
+      line-height:1.08; letter-spacing:-0.01em; color:var(--ink); margin:0;
     }
-    .head-meta { display:flex; align-items:baseline; gap:7px; min-width:0; margin-left:auto; flex:none; }
-    .greeting { font-size:13px; font-weight:650; line-height:1.3; color:var(--ink); }
-    .today { font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; }
-    .today::before { content:"·"; margin-right:7px; color:var(--faint); }
+    .head-meta {
+      display:flex; flex-direction:column; align-items:flex-end; gap:2px;
+      min-width:0; margin-left:auto; flex:none; text-align:right;
+    }
+    .greeting {
+      font-size:11px; font-weight:650; line-height:1.3; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--earth-deep);
+    }
+    .today { font-size:13px; line-height:1.3; color:var(--muted); font-variant-numeric:tabular-nums; }
     .head-right { display:flex; align-items:center; gap:8px; flex:none; }
     .icon-btn {
       width:44px; height:44px; display:grid; place-items:center; background:var(--card);
@@ -97,8 +121,8 @@
     .search-wrap { margin-bottom:28px; }
     .search-box {
       display:flex; align-items:center; gap:10px;
-      background:var(--card); border:1px solid var(--line); border-radius:999px;
-      padding:11px 16px; box-shadow:var(--shadow);
+      background:var(--card); border:1px solid color-mix(in srgb,var(--brand) 20%,var(--line));
+      border-radius:999px; padding:11px 16px; box-shadow:var(--shadow);
     }
     .search-box svg { width:16px; height:16px; color:var(--faint); flex:none; }
     .search-box input {
@@ -130,13 +154,23 @@
     }
 
     .panel { min-width:0; }
-    .panel-head { margin:0 0 12px; padding-bottom:7px; border-bottom:1px solid var(--line);
-      display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .panel-head {
+      margin:0 0 12px; padding-bottom:7px;
+      border-bottom:1px solid var(--line);
+      box-shadow:inset 0 -2px 0 -1px var(--rule-brass);
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    }
     .panel-title {
       display:flex; align-items:center; gap:8px; font-size:11px; font-weight:700;
       letter-spacing:.16em; text-transform:uppercase; color:var(--earth-deep); margin:0;
     }
     .panel-title::before { content:""; flex:none; width:4px; height:11px; border-radius:2px; background:var(--earth); }
+    .panel-title--anchor::before,
+    .panel-title--waves::before,
+    .panel-title--compass::before { display:none; }
+    .panel-title--anchor .panel-mark,
+    .panel-title--waves .panel-mark,
+    .panel-title--compass .panel-mark { flex:none; width:13px; height:13px; color:var(--earth); }
     .head-actions { margin-left:auto; display:flex; gap:6px; align-items:center; }
 
     /* ---- flat source list (Drive / Websites) --------------------------
@@ -146,6 +180,8 @@
     .src-block:last-child { margin-bottom:0; }
     .src-head {
       display:flex; align-items:center; gap:12px; padding:2px 0 16px;
+      border-bottom:1px solid var(--line);
+      box-shadow:inset 0 -2px 0 -1px var(--rule-brass);
     }
     .src-head-icon {
       flex:none; width:34px; height:34px; border-radius:9px; display:grid; place-items:center;
@@ -173,6 +209,7 @@
       list-style:none; margin:0; padding:0;
       display:grid; grid-template-columns:1fr 1fr; grid-auto-flow:row; column-gap:32px;
     }
+    #driveBody > .src-rows { padding-inline-start:14px; }
     .src-row { border-bottom:1px solid var(--line-soft); }
     .src-row-main {
       display:flex; align-items:center; gap:11px; padding:12px 2px;
@@ -181,8 +218,11 @@
       border-radius:6px; transition:background .15s;
     }
     a.src-row-main:hover, button.src-row-main:hover { background:var(--hover-tint); }
-    .src-dot { flex:none; width:9px; height:9px; border-radius:50%; background:var(--accent,var(--brand)); }
-    .src-row-name { flex:1; min-width:0; font-size:15px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .src-dot {
+      flex:none; width:7px; height:7px; border-radius:1px;
+      background:var(--accent,var(--brand)); transform:rotate(45deg);
+    }
+    .src-row-name { flex:1; min-width:0; font-size:15px; font-weight:400; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .src-row-count {
       flex:none; font-size:13px; color:var(--muted); background:var(--paper-2);
       border-radius:999px; padding:2px 10px; min-width:22px; text-align:center;
@@ -193,8 +233,8 @@
 
     .src-sub { list-style:none; margin:0 0 4px; padding:0 0 0 20px; grid-column:1 / -1; }
     .src-sub .src-row-main { padding:9px 2px; }
-    .src-sub .src-row-name { font-size:14px; font-weight:500; }
-    .src-sub .src-dot { width:7px; height:7px; }
+    .src-sub .src-row-name { font-size:14px; font-weight:400; }
+    .src-sub .src-dot { width:6px; height:6px; }
 
     .src-row.is-soon .src-row-main { opacity:.5; pointer-events:none; }
     .src-soon-tag {
@@ -270,6 +310,12 @@
     }
 
     /* ---- sidebar (pins + list) ----------------------------------------- */
+    .sidebar .panel {
+      background:var(--panel-sidebar-bg);
+      border:1px solid var(--panel-sidebar-border);
+      border-radius:var(--radius); padding:12px 14px 14px;
+      box-shadow:var(--panel-sidebar-shadow);
+    }
     .sidebar .panel-head { margin-bottom:10px; }
     .sidebar .head-link {
       font:inherit; font-size:13px; font-weight:650; color:var(--brand);
@@ -439,8 +485,13 @@
     footer {
       display:flex; align-items:baseline; justify-content:space-between;
       flex-wrap:wrap; gap:6px 18px;
-      margin-top:auto; padding-top:14px; border-top:1px solid var(--line);
+      margin-top:auto; padding-top:14px;
+      border-top:1px solid var(--line);
+      box-shadow:inset 0 2px 0 -1px var(--rule-brass);
       color:var(--muted); font-size:12.5px; text-align:left;
+    }
+    footer > span:first-child {
+      font-family:var(--display); font-size:12px; letter-spacing:.01em; color:var(--faint);
     }
     footer a { color:var(--ink); font-weight:650; text-decoration:underline; text-underline-offset:2px; }
     footer a:hover { color:var(--brand); }
@@ -453,7 +504,7 @@
         padding-inline:12px;
       }
       .hero-inner { padding:14px 0 12px; gap:12px; }
-      .head-meta { margin-left:0; }
+      .head-meta { margin-left:0; align-items:flex-start; text-align:left; }
       .todo, .links a, .tile { min-height:48px; }
     }
 
@@ -468,6 +519,15 @@
     }
 
     @media (prefers-reduced-motion: reduce){ * { transition:none !important; } }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) header.hero::after {
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24' preserveAspectRatio='none'%3E%3Cpath d='M0 16 Q 25 4 50 16 T 100 16 T 150 16 T 200 16 T 250 16 T 300 16' fill='none' stroke='%234fc3c3' stroke-opacity='0.14' stroke-width='2'/%3E%3C/svg%3E");
+      }
+    }
+    :root[data-theme="dark"] header.hero::after {
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24' preserveAspectRatio='none'%3E%3Cpath d='M0 16 Q 25 4 50 16 T 100 16 T 150 16 T 200 16 T 250 16 T 300 16' fill='none' stroke='%234fc3c3' stroke-opacity='0.14' stroke-width='2'/%3E%3C/svg%3E");
+    }
   </style>
   <script>
     try { var t = localStorage.getItem("tcc-theme"); if (t) document.documentElement.dataset.theme = t; } catch(e){}
@@ -480,7 +540,16 @@
       <div class="hero-inner">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v13"/><path d="M8 19a4 4 0 0 0 8 0"/><path d="M4 10h16l-1.5 5.5a2 2 0 0 1-1.93 1.5H7.43a2 2 0 0 1-1.93-1.5L4 10Z"/>
+            <path d="M12 2v1.5"/>
+            <path d="M9 3.5l.75.75"/>
+            <path d="M15 3.5l-.75.75"/>
+            <path d="M9 7.5V5.5h6v2"/>
+            <path d="M9.5 7.5h5"/>
+            <path d="M10 7.5 8.5 22"/>
+            <path d="M14 7.5 15.5 22"/>
+            <path d="M9.2 12h5.6"/>
+            <path d="M8.8 16.5h6.4"/>
+            <path d="M8 22h8"/>
           </svg>
         </span>
         <h1>Teaching Command Center</h1>
@@ -497,7 +566,7 @@
     <div class="search-wrap">
       <div class="search-box">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="search" id="searchInput" placeholder="Search your links…" aria-label="Search links" autocomplete="off" />
+        <input type="search" id="searchInput" placeholder="Search the chart…" aria-label="Search links" autocomplete="off" />
         <span class="search-kbd" aria-hidden="true">/</span>
       </div>
     </div>
@@ -511,7 +580,13 @@
 
         <section class="panel" data-section="My Websites">
           <div class="panel-head">
-            <h2 class="panel-title">My Websites</h2>
+            <h2 class="panel-title panel-title--compass">
+              <svg class="panel-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>
+              </svg>
+              My Websites
+            </h2>
           </div>
           <div class="app-grid" id="src-sites"></div>
         </section>
@@ -521,7 +596,14 @@
       <div class="col sidebar">
         <section class="panel">
           <div class="panel-head">
-            <h2 class="panel-title">Pins</h2>
+            <h2 class="panel-title panel-title--anchor">
+              <svg class="panel-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="5" r="3"/>
+                <path d="M12 22V8"/>
+                <path d="M5 12H2a10 10 0 0 0 20 0h-3"/>
+              </svg>
+              Pins
+            </h2>
             <div class="head-actions">
               <button class="head-link" type="button" id="pinManage" aria-pressed="false">Manage</button>
             </div>
@@ -532,7 +614,14 @@
 
         <section class="panel">
           <div class="panel-head">
-            <h2 class="panel-title">List</h2>
+            <h2 class="panel-title panel-title--waves">
+              <svg class="panel-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+              </svg>
+              List
+            </h2>
             <div class="head-actions">
               <button class="head-link" type="button" id="todoAddToggle" aria-expanded="false" aria-controls="todoAdd">Add</button>
             </div>
