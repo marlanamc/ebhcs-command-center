@@ -467,6 +467,21 @@
     }
     .todo:hover .todo-actions, .todo-actions:focus-within { opacity:1; }
     .todo-actions .mini-btn { padding:3px 6px; font-size:12px; line-height:1; }
+    /* while the Add form is open the list is in "arrange" mode: the reorder
+       arrows stay visible so you can shuffle items without hunting for hover */
+    .todos.is-arranging .todo-actions { opacity:1; gap:2px; }
+    .todo-move {
+      flex:none; background:none; border:0; cursor:pointer; color:var(--faint);
+      padding:2px 3px; border-radius:6px; display:grid; place-items:center;
+      transition:color .15s;
+    }
+    .todo-move svg { width:14px; height:14px; }
+    .todo-move:hover:not(:disabled) { color:var(--brand); }
+    .todo-move:disabled { opacity:.3; cursor:default; }
+    .todo-move:focus-visible {
+      outline:none;
+      box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
+    }
     .todo-del {
       flex:none; background:none; border:0; cursor:pointer; color:var(--faint);
       font-size:15px; line-height:1; padding:2px 4px; border-radius:6px; transition:color .15s;
@@ -1101,23 +1116,64 @@
     const todoFoot = document.getElementById("todoFoot");
     const clearDoneBtn = document.getElementById("clearDone");
 
+    let todoArranging = false;
+
+    /* Display order: unfinished items keep their custom order, finished ones
+       sink to the bottom. Unchecking an item puts it back where it was. */
+    function orderedTodos(){
+      return state.todos.filter(t => !t.done).concat(state.todos.filter(t => t.done));
+    }
+
+    /* Swap with the neighbour above/below, but never across the
+       unfinished/finished divide — the render would just undo that. */
+    function moveTodo(id, dir){
+      const ordered = orderedTodos();
+      const i = ordered.findIndex(t => t.id === id);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= ordered.length) return;
+      if (ordered[j].done !== ordered[i].done) return;
+      [ordered[i], ordered[j]] = [ordered[j], ordered[i]];
+      state.todos = ordered;
+      scheduleSave();
+      renderTodos();
+    }
+
     function renderTodos(){
+      todosEl.classList.toggle("is-arranging", todoArranging);
       if (!state.todos.length) {
         todosEl.innerHTML = `<li class="list-empty">Nothing on your list yet.</li>`;
         todoFoot.hidden = true;
         return;
       }
-      todosEl.innerHTML = state.todos.map(t => `
+      const ordered = orderedTodos();
+      todosEl.innerHTML = ordered.map((t, i) => {
+        const canUp = i > 0 && ordered[i - 1].done === t.done;
+        const canDown = i < ordered.length - 1 && ordered[i + 1].done === t.done;
+        const moves = todoArranging ? `
+            <button class="todo-move" type="button" aria-label="Move up" data-up="${t.id}"${canUp ? "" : " disabled"}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+            </button>
+            <button class="todo-move" type="button" aria-label="Move down" data-down="${t.id}"${canDown ? "" : " disabled"}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>` : "";
+        return `
         <li class="todo${t.done ? " done" : ""}" data-id="${t.id}">
           <button class="todo-check" type="button" aria-label="${t.done ? "Mark not done" : "Mark done"}" data-check="${t.id}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </button>
           <span class="todo-text" data-text="${t.id}">${escapeHtml(t.text)}</span>
-          <span class="todo-actions">
+          <span class="todo-actions">${moves}
             <button class="todo-del" type="button" aria-label="Delete" data-del="${t.id}">✕</button>
           </span>
-        </li>`).join("");
+        </li>`;
+      }).join("");
       todoFoot.hidden = !state.todos.some(t => t.done);
+      todosEl.querySelectorAll("[data-up]").forEach(btn => {
+        btn.addEventListener("click", () => moveTodo(btn.dataset.up, -1));
+      });
+      todosEl.querySelectorAll("[data-down]").forEach(btn => {
+        btn.addEventListener("click", () => moveTodo(btn.dataset.down, 1));
+      });
       todosEl.querySelectorAll("[data-check]").forEach(btn => {
         btn.addEventListener("click", () => {
           const t = state.todos.find(x => x.id === btn.dataset.check);
@@ -1160,15 +1216,21 @@
       });
     }
 
-    todoAddToggle.addEventListener("click", () => {
-      const open = todoAddForm.hidden;
+    function setTodoAddOpen(open){
       todoAddForm.hidden = !open;
       todoAddToggle.setAttribute("aria-expanded", String(open));
+      todoAddToggle.textContent = open ? "Done" : "Add";
+      todoArranging = open;
+      renderTodos();
+    }
+
+    todoAddToggle.addEventListener("click", () => {
+      const open = todoAddForm.hidden;
+      setTodoAddOpen(open);
       if (open) todoInput.focus();
     });
     todoAddCancel.addEventListener("click", () => {
-      todoAddForm.hidden = true;
-      todoAddToggle.setAttribute("aria-expanded", "false");
+      setTodoAddOpen(false);
       todoInput.value = "";
     });
     todoAddForm.addEventListener("submit", (e) => {
@@ -1176,7 +1238,7 @@
       const text = todoInput.value.trim();
       if (!text) return;
       if (state.todos.length >= 300) return;
-      state.todos.unshift({ id: uid(), text, done:false, created: new Date().toISOString() });
+      state.todos.push({ id: uid(), text, done:false, created: new Date().toISOString() });
       todoInput.value = "";
       scheduleSave();
       renderTodos();
