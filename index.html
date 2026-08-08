@@ -189,12 +189,10 @@
     .panel-title::before { content:""; flex:none; width:4px; height:11px; border-radius:2px; background:var(--earth); }
     .panel-title--anchor::before,
     .panel-title--waves::before,
-    .panel-title--compass::before,
-    .panel-title--calendar::before { display:none; }
+    .panel-title--compass::before { display:none; }
     .panel-title--anchor .panel-mark,
     .panel-title--waves .panel-mark,
-    .panel-title--compass .panel-mark,
-    .panel-title--calendar .panel-mark { flex:none; width:13px; height:13px; color:var(--earth); }
+    .panel-title--compass .panel-mark { flex:none; width:13px; height:13px; color:var(--earth); }
     .head-actions { margin-left:auto; display:flex; gap:6px; align-items:center; }
 
     /* ---- week strip ---------------------------------------------------
@@ -759,18 +757,10 @@
     <main class="cols" id="board">
       <!-- LEFT: week strip + Drive + Websites -->
       <div class="col">
-        <section class="panel cal" data-section="Ship's Log" aria-labelledby="calPanelTitle">
-          <div class="panel-head">
-            <h2 class="panel-title panel-title--calendar" id="calPanelTitle">
-              <svg class="panel-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
-              </svg>
-              Ship's Log
-            </h2>
-          </div>
+        <section class="panel cal" data-section="Ship's Log" aria-labelledby="calDate">
           <div class="cal-head">
             <div class="cal-title-row">
-              <h3 class="cal-date" id="calDate"></h3>
+              <h2 class="cal-date" id="calDate"></h2>
               <button class="cal-add-btn" type="button" id="calAddToggle" aria-label="Log entry for this day">+</button>
               <div class="cal-nav">
                 <button class="cal-today" type="button" id="calToday" hidden>Today</button>
