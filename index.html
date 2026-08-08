@@ -353,6 +353,7 @@
       background:var(--accent,var(--brand));
     }
     .app-icon img { width:100%; height:100%; border-radius:12px; display:block; object-fit:cover; }
+    .app-icon.is-emoji { font-size:24px; font-weight:400; color:inherit; line-height:1; }
     .app-body { min-width:0; flex:1; display:flex; flex-direction:column; }
     .app-name { display:block; font-size:15px; font-weight:650; line-height:1.3; margin:0 0 2px; }
     .app-desc { display:block; font-size:12.5px; color:var(--muted); line-height:1.4; margin:0; overflow-wrap:anywhere; }
@@ -805,27 +806,63 @@
        becomes a toggle instead of a link, so its own "url" is unused.
        "soon: true" dims a row and makes it unclickable.
 
-       The two italic quick-open links above and below the folder rows come
-       from DRIVE_ROOT_URL / DRIVE_EXTERNAL_URL, not from the folders.
+       The italic quick-open link above the folder rows comes from
+       DRIVE_ROOT_URL, not from the folders.
 
        SITES: icon tiles, always a direct link. { name, desc, url, accent }
-       plus either "mono" (a letter) or "icon" (a path to an image).
+       plus "mono" (a letter), "icon" (image path), or "emoji" (glyph + accent bg).
        ===================================================================== */
     const DRIVE_ROOT_NAME = "FY27";
     const DRIVE_ROOT_URL = "https://drive.google.com/";
     const DRIVE_FOLDERS = [
-      { name:"Materials", url:"https://drive.google.com/", accent:"var(--hue-1)" },
-      { name:"Admin", url:"https://drive.google.com/", accent:"var(--hue-2)" },
-      { name:"Workforce Data Analyst", url:"https://drive.google.com/", accent:"var(--hue-3)" },
-      { name:"Old Material", url:"https://drive.google.com/", accent:"var(--hue-4)" },
+      {
+        name:"My Class",
+        url:"https://drive.google.com/",
+        accent:"var(--hue-1)",
+        subfolders:[
+          { name:"Attendance", url:"https://drive.google.com/" },
+          { name:"Slides/Materials", url:"https://drive.google.com/" },
+          { name:"Google Classroom", url:"https://drive.google.com/" },
+        ],
+      },
+      {
+        name:"Teacher Admin",
+        url:"https://drive.google.com/",
+        accent:"var(--hue-2)",
+        subfolders:[
+          { name:"Lesson Plans", url:"https://drive.google.com/" },
+          { name:"Timesheet", url:"https://drive.google.com/" },
+          { name:"Meetings", url:"https://drive.google.com/" },
+        ],
+      },
+      {
+        name:"Workforce Data Analyst",
+        url:"https://drive.google.com/",
+        accent:"var(--hue-3)",
+        subfolders:[
+          { name:"Work Log", url:"https://drive.google.com/" },
+          { name:"Data Report", url:"https://drive.google.com/" },
+        ],
+      },
+      {
+        name:"All Material",
+        url:"https://drive.google.com/",
+        accent:"var(--hue-7)",
+        subfolders:[
+          { name:"Level 3 Materials", url:"https://drive.google.com/" },
+          { name:"Materials FY23", url:"https://drive.google.com/" },
+          { name:"Materials FY24", url:"https://drive.google.com/" },
+          { name:"Materials FY25", url:"https://drive.google.com/" },
+          { name:"Materials FY26", url:"https://drive.google.com/" },
+        ],
+      },
     ];
-    const DRIVE_EXTERNAL_URL = "https://drive.google.com/";
 
     const SITES = [
-      { name:"ESOL LMS", desc:"myesolclass.com", url:"https://myesolclass.com/", mono:"E", accent:"var(--hue-4)" },
-      { name:"Resources Page", desc:"ESOL Level 3 resources", url:"https://esol-level-3.vercel.app/", mono:"R", accent:"var(--hue-5)" },
-      { name:"Advisor Bulletin Board", desc:"EBHCS job board", url:"https://ebhcsjobboard.web.app/", mono:"B", accent:"var(--hue-6)" },
-      { name:"Advisor Portal", desc:"EBHCS job board — admin", url:"https://ebhcsjobboard.web.app/admin", mono:"P", accent:"var(--hue-7)" },
+      { name:"ESOL LMS", desc:"myesolclass.com", url:"https://myesolclass.com/", icon:"icons/esol-lms.svg", accent:"var(--hue-4)" },
+      { name:"Resources Page", desc:"ESOL Level 3 resources", url:"https://esol-level-3.vercel.app/", icon:"icons/esol-resources.svg", accent:"var(--hue-5)" },
+      { name:"Advisor Bulletin Board", desc:"EBHCS job board", url:"https://ebhcsjobboard.web.app/", icon:"icons/bulletin-board.png", accent:"var(--hue-6)" },
+      { name:"Advisor Portal", desc:"EBHCS job board — admin", url:"https://ebhcsjobboard.web.app/admin", emoji:"⛵", accent:"#5B9BD5" },
     ];
     /* ===================================================================== */
 
@@ -884,9 +921,6 @@
             <span>Open ${escapeHtml(DRIVE_ROOT_NAME)} folder</span>${openSvg}
           </a>
           <ul class="src-rows">${rows}</ul>
-          <a class="src-quick" href="${escapeHtml(DRIVE_EXTERNAL_URL)}" target="_blank" rel="noopener noreferrer">
-            <span>Open External Collaboration folder</span>${openSvg}
-          </a>
         </div>`;
 
       el.querySelectorAll("[data-toggle]").forEach(btn => {
@@ -912,10 +946,13 @@
       const el = document.getElementById("src-sites");
       if (!el) return;
       el.innerHTML = SITES.map(s => {
-        const inner = s.icon ? `<img src="${s.icon}" alt="" />` : escapeHtml(s.mono || "?");
+        const iconCls = s.emoji ? " is-emoji" : "";
+        const inner = s.icon ? `<img src="${s.icon}" alt="" />`
+          : s.emoji ? escapeHtml(s.emoji)
+          : escapeHtml(s.mono || "?");
         return `
         <a class="app-tile" href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" style="--accent:${s.accent || "var(--brand)"}" data-search="${escapeHtml([s.name, s.desc, s.url].filter(Boolean).join(" "))}">
-          <span class="app-icon" aria-hidden="true">${inner}</span>
+          <span class="app-icon${iconCls}" aria-hidden="true">${inner}</span>
           <span class="app-body">
             <span class="app-name">${escapeHtml(s.name)}</span>
             <span class="app-desc">${escapeHtml(s.desc || "")}</span>

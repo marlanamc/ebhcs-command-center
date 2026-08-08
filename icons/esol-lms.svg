@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" role="img" aria-label="ESOL LMS">
+  <rect width="44" height="44" rx="12" fill="#FDF7F0"/>
+  <rect x="6" y="6" width="32" height="32" rx="9" fill="#A35544"/>
+  <path fill="#fff" d="M22 13.5 12.5 17.5v10Q22 30.5 22 27.5V13.5Z"/>
+  <path fill="#fff" d="M22 13.5 31.5 17.5v10Q22 30.5 22 27.5V13.5Z"/>
+  <path fill="none" stroke="#8B4235" stroke-width="1.1" stroke-linecap="round" d="M22 13.5v14"/>
+  <path stroke="#A35544" stroke-width="0.85" stroke-linecap="round" opacity="0.5" d="M14.5 21h4.5M14.5 24h3"/>
+  <path stroke="#A35544" stroke-width="0.85" stroke-linecap="round" opacity="0.5" d="M25 21h4.5M26 24h3"/>
+</svg>

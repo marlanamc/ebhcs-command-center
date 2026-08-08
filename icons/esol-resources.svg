@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" role="img" aria-label="ESOL resources">
+  <rect width="44" height="44" rx="12" fill="#F2E8D5"/>
+  <g transform="translate(6 5)">
+    <rect x="5" y="8" width="17" height="24" rx="1.75" fill="#5B8EC4"/>
+    <rect x="7" y="5" width="17" height="24" rx="1.75" fill="#5BA86B"/>
+    <rect x="9" y="2" width="17" height="24" rx="1.75" fill="#D4635C"/>
+    <path d="M11.5 5v18M14.5 4.5v19M17.5 4v20" stroke="#fff" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+  </g>
+  <rect x="7" y="33" width="30" height="8" rx="4" fill="#4DAFA8"/>
+  <text x="22" y="38.5" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="5.25" font-weight="700" letter-spacing="0.4" fill="#fff">ESOL</text>
+</svg>
