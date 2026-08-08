@@ -50,8 +50,8 @@ function clean(input) {
     id: str(p?.id, 40),
     label: str(p?.label, 60),
     url: safeUrl(p?.url),
-    icon: str(p?.icon, 24),
-    color: /^#[0-9a-fA-F]{6}$/.test(p?.color || "") ? p.color : "#0f6e6e",
+    icon: /^[a-z0-9]{0,24}$/.test(str(p?.icon, 24)) ? str(p?.icon, 24) : "anchor",
+    color: /^#[0-9a-fA-F]{6}$/.test(p?.color || "") ? p.color : "#0c7272",
   }));
   const todos = (Array.isArray(o.todos) ? o.todos : []).slice(0, MAX_TODOS).map((t) => ({
     id: str(t?.id, 40),
