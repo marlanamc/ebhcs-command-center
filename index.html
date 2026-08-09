@@ -194,7 +194,10 @@
     .sidebar .panel--ci { padding:10px 14px 12px; }
     .panel--ci.is-collapsed { padding-bottom:10px; }
     .panel--ci .panel-head { margin-bottom:6px; padding-bottom:5px; }
-    .panel--ci.is-collapsed .panel-head { margin-bottom:0; }
+    .panel--ci.is-collapsed .panel-head {
+      margin-bottom:0; padding-bottom:0;
+      border-bottom:none; box-shadow:none;
+    }
     .panel--ci .panel-title { font-size:10px; letter-spacing:.14em; }
     .panel--ci .panel-title::before { height:9px; }
     .status-toggle {
