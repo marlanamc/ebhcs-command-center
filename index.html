@@ -188,6 +188,46 @@
     .panel-title--compass .panel-mark { flex:none; width:13px; height:13px; color:var(--eyebrow); }
     .head-actions { margin-left:auto; display:flex; gap:6px; align-items:center; }
 
+    /* ---- CI status ----------------------------------------------------
+       Compact sidebar panel below Duty List — latest run per workflow on
+       tracked repos so a broken deploy doesn't go unnoticed. */
+    .sidebar .panel--ci { padding:10px 14px 12px; }
+    .panel--ci .panel-head { margin-bottom:6px; padding-bottom:5px; }
+    .panel--ci .panel-title { font-size:10px; letter-spacing:.14em; }
+    .panel--ci .panel-title::before { height:9px; }
+    .ci-refresh {
+      font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--faint);
+      background:none; border:0; cursor:pointer; padding:1px 3px; border-radius:4px;
+    }
+    .ci-refresh:hover { color:var(--muted); background:var(--hover-tint); }
+    .ci-rows {
+      list-style:none; margin:0; padding:0;
+      display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 8px;
+    }
+    .ci-group {
+      grid-column:1 / -1; padding:7px 2px 2px;
+    }
+    .ci-group:first-child { padding-top:0; }
+    .ci-group-label {
+      font-size:9px; font-weight:700; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--faint);
+    }
+    .ci-row { min-width:0; }
+    .ci-row-main {
+      display:flex; align-items:center; gap:6px; padding:4px 2px;
+      text-decoration:none; color:inherit; border-radius:5px; transition:background .15s;
+    }
+    a.ci-row-main:hover { background:var(--hover-tint); }
+    .ci-dot { flex:none; width:6px; height:6px; border-radius:50%; background:var(--faint); }
+    .ci-dot.is-ok { background:var(--ok); }
+    .ci-dot.is-fail { background:var(--danger); }
+    .ci-dot.is-pending { background:var(--hue-3); animation:ci-pulse 1.4s ease-in-out infinite; }
+    @keyframes ci-pulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+    .ci-text { flex:1; min-width:0; display:flex; flex-direction:column; gap:0; }
+    .ci-name { font-size:11.5px; font-weight:650; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ci-meta { font-size:10px; line-height:1.2; color:var(--faint); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ci-row.is-fail .ci-meta { color:var(--danger); }
+
     /* ---- week strip ---------------------------------------------------
        Sits above Drive in the left column. Pick a day, add simple notes
        as pills below the date — synced like pins and list items. */
@@ -830,6 +870,16 @@
             <button class="link-btn" type="button" id="clearDone">Clear finished</button>
           </div>
         </section>
+
+        <section class="panel panel--ci" data-section="CI Status">
+          <div class="panel-head">
+            <h2 class="panel-title">CI Status</h2>
+            <div class="head-actions">
+              <button class="ci-refresh" type="button" id="ciRefresh">Refresh</button>
+            </div>
+          </div>
+          <ul class="ci-rows" id="ciStatus"></ul>
+        </section>
       </div>
     </main>
 
@@ -1008,6 +1058,129 @@
 
     renderDrive();
     renderSites();
+
+    /* ---- CI status ------------------------------------------------------
+       Latest run per workflow on tracked repos. Prefers GET /api/ci; falls
+       back to GitHub's public API when running locally without the Pages
+       function. Cached 5 minutes. */
+    const CI_CACHE_KEY = "tcc-ci-cache-v3";
+    const CI_TTL_MS = 5 * 60 * 1000;
+    const CI_PUBLIC_PROJECTS = [
+      {
+        repo: "marlanamc/advisor-bulletin",
+        label: "Bulletin Board",
+        workflows: [
+          { file: "deploy.yml", label: "Deploy" },
+          { file: "full-test-matrix.yml", label: "Test Matrix" },
+        ],
+      },
+      {
+        repo: "marlanamc/esol-resources",
+        label: "ESOL LMS",
+        workflows: [
+          { file: "ci.yml", label: "CI" },
+        ],
+      },
+    ];
+
+    function ciRelTime(iso){
+      const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+      if (mins < 1) return "just now";
+      if (mins < 60) return `${mins}m ago`;
+      const hrs = Math.round(mins / 60);
+      if (hrs < 24) return `${hrs}h ago`;
+      return `${Math.round(hrs / 24)}d ago`;
+    }
+
+    async function ciFetchRun(repo, file){
+      const res = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/${file}/runs?per_page=1`, {
+        headers: { Accept:"application/vnd.github+json" },
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const data = await res.json();
+      const run = data.workflow_runs && data.workflow_runs[0];
+      if (!run) return null;
+      return { status:run.status, conclusion:run.conclusion, url:run.html_url, updatedAt:run.updated_at };
+    }
+
+    function ciStatusMeta(run){
+      if (!run) return { cls:"is-unknown", label:"No runs yet" };
+      if (run.status !== "completed") {
+        return { cls:"is-pending", label: run.status === "in_progress" ? "Running…" : "Queued…" };
+      }
+      if (run.conclusion === "success") return { cls:"is-ok", label:ciRelTime(run.updatedAt) };
+      if (["failure", "timed_out", "action_required"].includes(run.conclusion)) {
+        return { cls:"is-fail", label:`Failed · ${ciRelTime(run.updatedAt)}` };
+      }
+      return { cls:"is-unknown", label:`${run.conclusion || "unknown"} · ${ciRelTime(run.updatedAt)}` };
+    }
+
+    function ciRowHtml(project, w){
+      const meta = w.error ? { cls:"is-unknown", label:"Couldn't check" } : ciStatusMeta(w.run);
+      const href = (w.run && w.run.url) || `https://github.com/${project.repo}/actions`;
+      return `
+        <li class="ci-row ${meta.cls === "is-fail" ? "is-fail" : ""}">
+          <a class="ci-row-main" href="${href}" target="_blank" rel="noopener noreferrer">
+            <span class="ci-dot ${meta.cls}" aria-hidden="true"></span>
+            <span class="ci-text">
+              <span class="ci-name">${escapeHtml(w.label)}</span>
+              <span class="ci-meta">${escapeHtml(meta.label)}</span>
+            </span>
+          </a>
+        </li>`;
+    }
+
+    function ciRender(el, projects){
+      el.innerHTML = projects.map(p => `
+        <li class="ci-group"><span class="ci-group-label">${escapeHtml(p.label)}</span></li>
+        ${p.workflows.map(w => ciRowHtml(p, w)).join("")}
+      `).join("");
+    }
+
+    async function ciFetchProjectsClient(){
+      return Promise.all(CI_PUBLIC_PROJECTS.map(async (project) => {
+        const workflows = await Promise.all(project.workflows.map(async (w) => {
+          try { return { ...w, run: await ciFetchRun(project.repo, w.file) }; }
+          catch { return { ...w, run:null, error:true }; }
+        }));
+        return { repo:project.repo, label:project.label, workflows };
+      }));
+    }
+
+    async function ciFetchProjects(force){
+      try {
+        const res = await fetch(`/api/ci${force ? "?refresh=1" : ""}`, { cache:"no-store" });
+        if (res.ok) return (await res.json()).projects;
+      } catch {}
+      return ciFetchProjectsClient();
+    }
+
+    async function loadCiStatus(force){
+      const el = document.getElementById("ciStatus");
+      if (!el) return;
+
+      let cache = null;
+      try { cache = JSON.parse(localStorage.getItem(CI_CACHE_KEY) || "null"); } catch {}
+      const fresh = cache && (Date.now() - cache.ts) < CI_TTL_MS;
+
+      if (fresh && !force){
+        ciRender(el, cache.projects);
+        return;
+      }
+      if (cache) ciRender(el, cache.projects);
+      else el.innerHTML = `<li class="ci-row" style="grid-column:1/-1"><span class="ci-row-main"><span class="ci-dot" aria-hidden="true"></span><span class="ci-text"><span class="ci-name">Checking GitHub…</span></span></span></li>`;
+
+      try {
+        const projects = await ciFetchProjects(force);
+        localStorage.setItem(CI_CACHE_KEY, JSON.stringify({ ts:Date.now(), projects }));
+        ciRender(el, projects);
+      } catch {
+        // Network down or rate-limited: leave stale cache showing.
+      }
+    }
+
+    document.getElementById("ciRefresh")?.addEventListener("click", () => loadCiStatus(true));
+    loadCiStatus(false);
 
     /* ---- search: filters everything on the page ----------------------
        Drive folders + subfolders, the Drive quick links, website tiles,
