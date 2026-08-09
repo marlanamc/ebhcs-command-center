@@ -21,6 +21,9 @@ const PROJECTS = [
     label: "ESOL LMS",
     workflows: [
       { file: "ci.yml", label: "CI" },
+      { file: "maintenance-weekly.yml", label: "Weekly" },
+      { file: "maintenance-monthly.yml", label: "Monthly" },
+      { file: "release-gate.yml", label: "Release Gate" },
     ],
   },
 ];

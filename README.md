@@ -18,6 +18,8 @@ plain HTML/CSS/JS, no build step, hosted on Cloudflare Pages.
 | `sw.js` | Service worker — caches the app so it loads instantly and works offline. |
 | `manifest.webmanifest` | PWA settings (name, icons, colors). |
 | `functions/api/data.js` | Cloudflare Pages Function — reads/writes your pins + list to KV. |
+| `functions/api/ci.js` | Latest GitHub Actions runs (CI, weekly/monthly maintenance, release gate). |
+| `functions/api/status.js` | Live prod probe for ESOL LMS (`myesolclass.com/api/health`). |
 
 ---
 
@@ -100,6 +102,22 @@ clearing the search leaves it exactly as collapsed as you had it.
 
 ---
 
+## Status panel (Live + CI)
+
+The sidebar **Status** panel answers two different questions:
+
+1. **Live** — is `myesolclass.com` up and talking to the DB right now?
+   (`GET /api/status` probes `https://myesolclass.com/api/health`)
+2. **CI / maintenance** — did the latest GitHub Actions runs pass?
+   (`GET /api/ci` for Bulletin Board + ESOL LMS workflows, including weekly
+   and monthly maintenance reports and the release gate)
+
+Refresh rechecks both. Results cache in `localStorage` for 5 minutes.
+Local `python -m http.server` has no Pages functions, so the UI falls back
+to direct probes / the public GitHub API.
+
+---
+
 ## Pins and List
 
 Pins and your list sync through `GET|PUT /api/data`, a Cloudflare Pages
@@ -147,7 +165,7 @@ git push -u origin main
 At the top of `sw.js`:
 
 ```js
-const CACHE = "tcc-shell-v4";   // bump the number on every deploy
+const CACHE = "tcc-shell-v6";   // bump the number on every deploy
 ```
 
 Increment that number every time you deploy, so the old cached copy is
