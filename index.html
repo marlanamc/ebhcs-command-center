@@ -188,43 +188,55 @@
     .panel-title--compass .panel-mark { flex:none; width:13px; height:13px; color:var(--eyebrow); }
     .head-actions { margin-left:auto; display:flex; gap:6px; align-items:center; }
 
-    /* ---- Status panel (Live + CI) -------------------------------------
-       Compact sidebar panel below Duty List — live prod probes plus latest
-       GitHub Actions runs so a down site / broken deploy is obvious. */
-    .sidebar .panel--ci { padding:10px 14px 12px; }
-    .panel--ci.is-collapsed { padding-bottom:10px; }
-    .panel--ci .panel-head { margin-bottom:6px; padding-bottom:5px; }
-    .panel--ci.is-collapsed .panel-head {
-      margin-bottom:0; padding-bottom:0;
-      border-bottom:none; box-shadow:none;
+    /* ---- Site health (Live + CI) --------------------------------------
+       Nested under My Websites — live prod probes plus latest GitHub
+       Actions runs. Collapsed by default; only the summary dot pulses
+       when something is actually broken. */
+    .sites-status {
+      margin-top:4px; padding-top:12px;
+      border-top:1px solid var(--line-soft);
     }
-    .panel--ci .panel-title { font-size:10px; letter-spacing:.14em; }
-    .panel--ci .panel-title::before { height:9px; }
-    .status-toggle {
+    .sites-status.is-collapsed { padding-top:10px; }
+    .sites-status-head {
       display:flex; align-items:center; gap:8px;
-      font:inherit; background:none; border:0; padding:0; cursor:pointer; color:inherit;
     }
-    .status-toggle .panel-title::before { display:none; }
+    .sites-status.is-collapsed .sites-status-head { margin-bottom:0; }
+    .sites-status:not(.is-collapsed) .sites-status-head { margin-bottom:8px; }
+    .status-toggle {
+      display:flex; align-items:center; gap:8px; flex:1; min-width:0;
+      font:inherit; background:none; border:0; padding:2px 0; cursor:pointer; color:inherit;
+    }
     .status-toggle:focus-visible {
       outline:none; border-radius:4px;
       box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent);
     }
+    .sites-status-label {
+      font-size:13px; font-weight:500; color:var(--faint); letter-spacing:0;
+      text-transform:none; transition:color .15s;
+    }
+    .status-toggle:hover .sites-status-label { color:var(--muted); }
+    .status-chevron {
+      flex:none; width:14px; height:14px; color:var(--faint);
+      transition:transform .15s;
+    }
+    .sites-status:not(.is-collapsed) .status-chevron { transform:rotate(180deg); }
     .status-summary-dot {
-      flex:none; width:8px; height:8px; border-radius:50%; background:var(--faint);
+      flex:none; width:7px; height:7px; border-radius:50%; background:var(--faint);
     }
     .status-summary-dot.is-ok { background:var(--ok); }
-    .status-summary-dot.is-fail { background:var(--danger); }
-    .status-summary-dot.is-pending { background:var(--hue-3); animation:ci-pulse 1.4s ease-in-out infinite; }
+    .status-summary-dot.is-fail { background:var(--danger); animation:ci-pulse 1.4s ease-in-out infinite; }
+    .status-summary-dot.is-pending { background:var(--hue-3); }
     .ci-refresh {
-      font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--faint);
-      background:none; border:0; cursor:pointer; padding:1px 3px; border-radius:4px;
+      flex:none; font-size:12px; font-weight:600; color:var(--faint);
+      background:none; border:0; cursor:pointer; padding:2px 4px; border-radius:4px;
     }
+    .sites-status.is-collapsed .ci-refresh { display:none; }
     .ci-refresh:hover { color:var(--muted); background:var(--hover-tint); }
     .ci-rows {
       list-style:none; margin:0; padding:0;
       display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 8px;
     }
-    .panel--ci.is-collapsed .ci-rows,
+    .sites-status.is-collapsed .ci-rows,
     #ciStatus[hidden] { display:none; }
     .ci-group {
       grid-column:1 / -1; padding:7px 2px 2px;
@@ -866,6 +878,17 @@
             </h2>
           </div>
           <div class="app-grid" id="src-sites"></div>
+          <div class="sites-status is-collapsed" id="statusPanel">
+            <div class="sites-status-head">
+              <button class="status-toggle" type="button" id="statusToggle" aria-expanded="false" aria-controls="ciStatus">
+                <span class="status-summary-dot is-pending" id="statusSummaryDot" aria-hidden="true"></span>
+                <span class="sites-status-label">Health &amp; deploys</span>
+                <svg class="status-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <button class="ci-refresh" type="button" id="ciRefresh">Refresh</button>
+            </div>
+            <ul class="ci-rows" id="ciStatus" hidden></ul>
+          </div>
         </section>
       </div>
 
@@ -913,19 +936,6 @@
           <div class="todo-foot" id="todoFoot" hidden>
             <button class="link-btn" type="button" id="clearDone">Clear finished</button>
           </div>
-        </section>
-
-        <section class="panel panel--ci is-collapsed" data-section="Status" id="statusPanel">
-          <div class="panel-head">
-            <button class="status-toggle" type="button" id="statusToggle" aria-expanded="false" aria-controls="ciStatus">
-              <span class="status-summary-dot is-pending" id="statusSummaryDot" aria-hidden="true"></span>
-              <h2 class="panel-title">Status</h2>
-            </button>
-            <div class="head-actions">
-              <button class="ci-refresh" type="button" id="ciRefresh">Refresh</button>
-            </div>
-          </div>
-          <ul class="ci-rows" id="ciStatus" hidden></ul>
         </section>
       </div>
     </main>
@@ -1106,10 +1116,10 @@
     renderDrive();
     renderSites();
 
-    /* ---- Status panel: Live prod + CI ---------------------------------
-       Live probes prefer GET /api/status (Pages function). CI prefers
-       GET /api/ci, with a public GitHub API fallback for local static
-       serving. Both are cached 5 minutes under one key. */
+    /* ---- Site health: Live prod + CI ----------------------------------
+       Nested under My Websites. Live probes prefer GET /api/status (Pages
+       function). CI prefers GET /api/ci, with a public GitHub API fallback
+       for local static serving. Both are cached 5 minutes under one key. */
     const STATUS_CACHE_KEY = "tcc-status-cache-v3";
     const STATUS_TTL_MS = 5 * 60 * 1000;
     const LIVE_SITES = [
