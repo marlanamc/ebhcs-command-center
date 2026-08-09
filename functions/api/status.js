@@ -7,17 +7,17 @@
 
 const SITES = [
   {
-    id: "esol-lms",
-    label: "ESOL LMS",
-    healthUrl: "https://myesolclass.com/api/health",
-    fallbackUrl: "https://myesolclass.com/",
-  },
-  {
     id: "bulletin-board",
     label: "Bulletin Board",
     healthUrl: "https://ebhcsjobboard.web.app/student-feed-snapshot.json",
     fallbackUrl: "https://ebhcsjobboard.web.app/",
     kind: "snapshot",
+  },
+  {
+    id: "esol-lms",
+    label: "ESOL LMS",
+    healthUrl: "https://myesolclass.com/api/health",
+    fallbackUrl: "https://myesolclass.com/",
   },
 ];
 

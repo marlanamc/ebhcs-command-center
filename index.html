@@ -221,6 +221,8 @@
       list-style:none; margin:0; padding:0;
       display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 8px;
     }
+    .panel--ci.is-collapsed .ci-rows,
+    #ciStatus[hidden] { display:none; }
     .ci-group {
       grid-column:1 / -1; padding:7px 2px 2px;
     }
@@ -1088,17 +1090,17 @@
     const STATUS_TTL_MS = 5 * 60 * 1000;
     const LIVE_SITES = [
       {
-        id: "esol-lms",
-        label: "ESOL LMS",
-        healthUrl: "https://myesolclass.com/api/health",
-        fallbackUrl: "https://myesolclass.com/",
-      },
-      {
         id: "bulletin-board",
         label: "Bulletin Board",
         healthUrl: "https://ebhcsjobboard.web.app/student-feed-snapshot.json",
         fallbackUrl: "https://ebhcsjobboard.web.app/",
         kind: "snapshot",
+      },
+      {
+        id: "esol-lms",
+        label: "ESOL LMS",
+        healthUrl: "https://myesolclass.com/api/health",
+        fallbackUrl: "https://myesolclass.com/",
       },
     ];
     const CI_PUBLIC_PROJECTS = [
@@ -1157,14 +1159,10 @@
     function liveStatusMeta(site){
       if (!site || site.error) return { cls:"is-unknown", label:"Couldn't check" };
       if (site.ok) {
-        const ms = typeof site.latencyMs === "number" ? `${site.latencyMs}ms` : "up";
-        if (site.source === "homepage") return { cls:"is-warn", label:`Reachable · ${ms}` };
-        if (site.source === "snapshot") return { cls:"is-ok", label:`Feed ok · ${ms}` };
-        const db = site.db === "ok" ? "DB ok" : "up";
-        return { cls:"is-ok", label:`${db} · ${ms}` };
+        const ms = typeof site.latencyMs === "number" ? `${site.latencyMs}ms` : "";
+        return { cls:"is-ok", label: ms ? `Up · ${ms}` : "Up" };
       }
-      if (site.source === "error") return { cls:"is-fail", label:"Unreachable" };
-      return { cls:"is-fail", label: site.db === "fail" ? "DB down" : "Down" };
+      return { cls:"is-fail", label:"Down" };
     }
 
     function liveRowHtml(site){
@@ -1207,6 +1205,7 @@
       `).join("");
       el.innerHTML = liveHtml + ciHtml;
       updateStatusSummary(sites, projects);
+      setStatusCollapsed(document.getElementById("statusPanel")?.classList.contains("is-collapsed") ?? true);
     }
 
     function computeStatusSummary(sites, projects){
@@ -1334,6 +1333,7 @@
       else {
         updateStatusSummary(null, null);
         el.innerHTML = `<li class="ci-row" style="grid-column:1/-1"><span class="ci-row-main"><span class="ci-dot is-pending" aria-hidden="true"></span><span class="ci-text"><span class="ci-name">Checking status…</span></span></span></li>`;
+        setStatusCollapsed(document.getElementById("statusPanel")?.classList.contains("is-collapsed") ?? true);
       }
 
       try {
