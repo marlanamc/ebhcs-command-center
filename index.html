@@ -234,7 +234,28 @@
       font-size:9px; font-weight:700; letter-spacing:.12em;
       text-transform:uppercase; color:var(--faint);
     }
+    .ci-block--live {
+      grid-column:1 / -1;
+      padding-bottom:8px; margin-bottom:2px;
+      border-bottom:1px solid var(--line-soft);
+    }
+    .ci-block--live .ci-group-label { display:block; }
+    .ci-live-grid {
+      list-style:none; margin:5px 0 0; padding:0;
+      display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 8px;
+    }
     .ci-row { min-width:0; }
+    .ci-row--live .ci-row-main {
+      padding:8px 10px;
+      background:var(--paper-2);
+      border:1px solid var(--line-soft);
+      border-radius:8px; gap:8px;
+    }
+    .ci-row--live .ci-text {
+      flex-direction:row; align-items:center; justify-content:space-between; gap:8px;
+    }
+    .ci-row--live .ci-name { font-size:12px; font-weight:650; }
+    .ci-row--live .ci-meta { flex:none; font-size:10px; font-weight:600; letter-spacing:.01em; }
     .ci-row-main {
       display:flex; align-items:center; gap:6px; padding:4px 2px;
       text-decoration:none; color:inherit; border-radius:5px; transition:background .15s;
@@ -1089,7 +1110,7 @@
        Live probes prefer GET /api/status (Pages function). CI prefers
        GET /api/ci, with a public GitHub API fallback for local static
        serving. Both are cached 5 minutes under one key. */
-    const STATUS_CACHE_KEY = "tcc-status-cache-v2";
+    const STATUS_CACHE_KEY = "tcc-status-cache-v3";
     const STATUS_TTL_MS = 5 * 60 * 1000;
     const LIVE_SITES = [
       {
@@ -1112,7 +1133,7 @@
         label: "Bulletin Board",
         workflows: [
           { file: "deploy.yml", label: "Deploy" },
-          { file: "full-test-matrix.yml", label: "Test Matrix" },
+          { file: "full-test-matrix.yml", label: "Weekly Link Test" },
         ],
       },
       {
@@ -1120,8 +1141,8 @@
         label: "ESOL LMS",
         workflows: [
           { file: "ci.yml", label: "CI" },
-          { file: "maintenance-weekly.yml", label: "Weekly" },
-          { file: "maintenance-monthly.yml", label: "Monthly" },
+          { file: "maintenance-weekly.yml", label: "Weekly Maintenance" },
+          { file: "maintenance-monthly.yml", label: "Monthly Maintenance" },
           { file: "release-gate.yml", label: "Release Gate" },
         ],
       },
@@ -1172,7 +1193,7 @@
       const meta = liveStatusMeta(site);
       const href = (site && site.url) || (site && site.fallbackUrl) || "#";
       return `
-        <li class="ci-row ${meta.cls === "is-fail" ? "is-fail" : ""}">
+        <li class="ci-row ci-row--live ${meta.cls === "is-fail" ? "is-fail" : ""}">
           <a class="ci-row-main" href="${href}" target="_blank" rel="noopener noreferrer">
             <span class="ci-dot ${meta.cls}" aria-hidden="true"></span>
             <span class="ci-text">
@@ -1198,16 +1219,35 @@
         </li>`;
     }
 
+    function applyCiLabels(projects){
+      const labelByKey = new Map();
+      CI_PUBLIC_PROJECTS.forEach(p => {
+        p.workflows.forEach(w => labelByKey.set(`${p.repo}:${w.file}`, w.label));
+      });
+      return (projects || []).map(p => ({
+        ...p,
+        label: CI_PUBLIC_PROJECTS.find(c => c.repo === p.repo)?.label || p.label,
+        workflows: (p.workflows || []).map(w => ({
+          ...w,
+          label: labelByKey.get(`${p.repo}:${w.file}`) || w.label,
+        })),
+      }));
+    }
+
     function statusRender(el, sites, projects){
+      const labeledProjects = applyCiLabels(projects);
+      const liveItems = (sites && sites.length ? sites : LIVE_SITES.map(s => ({ ...s, error:true }))).map(liveRowHtml).join("");
       const liveHtml = `
-        <li class="ci-group"><span class="ci-group-label">Live</span></li>
-        ${(sites && sites.length ? sites : LIVE_SITES.map(s => ({ ...s, error:true }))).map(liveRowHtml).join("")}`;
-      const ciHtml = (projects || []).map(p => `
+        <li class="ci-block ci-block--live">
+          <span class="ci-group-label">Live</span>
+          <ul class="ci-live-grid">${liveItems}</ul>
+        </li>`;
+      const ciHtml = labeledProjects.map(p => `
         <li class="ci-group"><span class="ci-group-label">${escapeHtml(p.label)}</span></li>
         ${p.workflows.map(w => ciRowHtml(p, w)).join("")}
       `).join("");
       el.innerHTML = liveHtml + ciHtml;
-      updateStatusSummary(sites, projects);
+      updateStatusSummary(sites, labeledProjects);
       setStatusCollapsed(document.getElementById("statusPanel")?.classList.contains("is-collapsed") ?? true);
     }
 

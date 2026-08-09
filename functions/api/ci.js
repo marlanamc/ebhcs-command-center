@@ -13,7 +13,7 @@ const PROJECTS = [
     label: "Bulletin Board",
     workflows: [
       { file: "deploy.yml", label: "Deploy" },
-      { file: "full-test-matrix.yml", label: "Test Matrix" },
+      { file: "full-test-matrix.yml", label: "Weekly Link Test" },
     ],
   },
   {
@@ -21,8 +21,8 @@ const PROJECTS = [
     label: "ESOL LMS",
     workflows: [
       { file: "ci.yml", label: "CI" },
-      { file: "maintenance-weekly.yml", label: "Weekly" },
-      { file: "maintenance-monthly.yml", label: "Monthly" },
+      { file: "maintenance-weekly.yml", label: "Weekly Maintenance" },
+      { file: "maintenance-monthly.yml", label: "Monthly Maintenance" },
       { file: "release-gate.yml", label: "Release Gate" },
     ],
   },
