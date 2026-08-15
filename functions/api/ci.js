@@ -12,7 +12,7 @@ const PROJECTS = [
     repo: "marlanamc/advisor-bulletin",
     label: "Bulletin Board",
     workflows: [
-      { file: "deploy.yml", label: "Deploy" },
+      { file: "production-health.yml", label: "Production Health" },
       { file: "full-test-matrix.yml", label: "Weekly Link Test" },
     ],
   },

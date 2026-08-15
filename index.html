@@ -1120,7 +1120,7 @@
        Nested under My Websites. Live probes prefer GET /api/status (Pages
        function). CI prefers GET /api/ci, with a public GitHub API fallback
        for local static serving. Both are cached 5 minutes under one key. */
-    const STATUS_CACHE_KEY = "tcc-status-cache-v3";
+    const STATUS_CACHE_KEY = "tcc-status-cache-v4";
     const STATUS_TTL_MS = 5 * 60 * 1000;
     const LIVE_SITES = [
       {
@@ -1142,7 +1142,7 @@
         repo: "marlanamc/advisor-bulletin",
         label: "Bulletin Board",
         workflows: [
-          { file: "deploy.yml", label: "Deploy" },
+          { file: "production-health.yml", label: "Production Health" },
           { file: "full-test-matrix.yml", label: "Weekly Link Test" },
         ],
       },
